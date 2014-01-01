@@ -34,28 +34,6 @@ logging.basicConfig(filename = "dump.log",
 logger = logging.getLogger(__name__)
 
 
-"""=== Docopt Arguments and Documentation ==="""
-
-from docopt import docopt
-
-doc = """BA-4chan-thread-archiver. Uses the 4chan API (with the py4chan wrapper) 
-to download thread images and/or thumbnails, along with thread HTML, JSON,
-and a list of referenced external links.
-
-Usage:
-  4chan-thread-archiver <url> [--path=<string>] [--delay=<int>] [--nothumbs] [--thumbsonly]
-  4chan-thread-archiver -h | --help
-  4chan-thread-archiver -v | --version
-
-Options:
-  --nothumbs          Don't download thumbnails
-  --thumbsonly        Download thumbnails, no images
-  --delay=<int>       Delay between thread checks [default: 20]
-  -h --help           Show help
-  -v --version        Show version
-"""
-
-
 
 """=== Constant Variables and Domain Names to Use ==="""
 
@@ -114,7 +92,6 @@ EXT_LINKS_FILENAME = "external_links.txt"
 
 """=== 4chan Archiver Class ==="""
 class Archiver(object):
-
     def __init__(self, board, thread, dst_dir, nothumbs=False, thumbsonly=False, https=False, logger = None):
         """
             Archiver Class Constructor, set up objects, logging,
