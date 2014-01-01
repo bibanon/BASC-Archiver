@@ -92,7 +92,7 @@ EXT_LINKS_FILENAME = "external_links.txt"
 
 """=== 4chan Archiver Class ==="""
 class Archiver(object):
-    def __init__(self, board, thread, dst_dir, nothumbs=False, thumbsonly=False, https=False, logger = None):
+    def __init__(self, board, thread, dst_dir, https=False, logger = None):
         """
             Archiver Class Constructor, set up objects, logging,
             and any necessary variables
@@ -111,10 +111,6 @@ class Archiver(object):
         self.board = board
         self.thread = thread        
         self.dst_dir = dst_dir
-
-        # Choose whether to get thumbs or images or not
-        self.nothumbs = nothumbs
-        self.thumbsonly = thumbsonly
 
         # HTTP header: use SSL when prompted
         self._https = https
