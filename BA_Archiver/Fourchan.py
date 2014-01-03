@@ -63,10 +63,10 @@ FOURCHAN_THUMBS_FOOTER = '/%s/thumb/%s'
     HTML Parsing Regex
     Used to parse and replace links in dumped HTML
 """
-HTTP_HEADER_UNIV = "https?://"          # works for both http and https links
-FOURCHAN_IMAGES_REGEX = "/\w+/src/"
-FOURCHAN_THUMBS_REGEX = "/\w+/thumb/"
-FOURCHAN_CSS_REGEX = "/css/(\w+)\.\d+.css"
+HTTP_HEADER_UNIV = r"https?://"          # works for both http and https links
+FOURCHAN_IMAGES_REGEX = r"/\w+/src/"
+FOURCHAN_THUMBS_REGEX = r"/\w+/thumb/"
+FOURCHAN_CSS_REGEX = r"/css/(\w+)\.\d+.css"
 
 """
     Original 4chan cdn links, changed 20131202.
