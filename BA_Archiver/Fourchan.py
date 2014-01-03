@@ -92,7 +92,7 @@ EXT_LINKS_FILENAME = "external_links.txt"
 
 """=== 4chan Archiver Class ==="""
 class Archiver(object):
-    def __init__(self, board, thread, dst_dir, https=False, logger = None):
+    def __init__(self, board, thread, https=False, logger = None):
         """
             Archiver Class Constructor, set up objects, logging,
             and any necessary variables
@@ -109,8 +109,7 @@ class Archiver(object):
 
         # Copy parameters to object (should probably make constant and private)
         self.board = board
-        self.thread = thread        
-        self.dst_dir = dst_dir
+        self.thread = thread
 
         # HTTP header: use SSL when prompted
         self._https = https
@@ -155,7 +154,7 @@ class Archiver(object):
             :return: bool
 
             >>> dst_dir = os.path.join(os.getcwd() + os.path.sep + "archives")
-            >>> curr_archiver = BA_Archiver.Fourchan("a", "1234567", dst_dir)
+            >>> curr_archiver = BA_Archiver.Fourchan.Archiver("a", "1234567", dst_dir)
             >>> curr_archiver.inaccessible()
             True
         """
@@ -168,7 +167,7 @@ class Archiver(object):
             :return: bool
 
             >>> dst_dir = os.path.join(os.getcwd() + os.path.sep + "archives")
-            >>> curr_archiver = BA_Archiver.Fourchan("a", "1234567", dst_dir)
+            >>> curr_archiver = BA_Archiver.Fourchan.Archiver("a", "1234567", dst_dir)
             >>> curr_archiver.dump()
             >>> curr_archiver.dumped_correctly()
             True
@@ -183,7 +182,7 @@ class Archiver(object):
             :param path: os.path object to file
 
             >>> dst_dir = os.path.join(os.getcwd() + os.path.sep + "archives")
-            >>> curr_archiver = BA_Archiver.Fourchan("a", "1234567", dst_dir)
+            >>> curr_archiver = BA_Archiver.Fourchan.Archiver("a", "1234567", dst_dir)
             >>> curr_archiver.make_sure_path_exists()
             >>> # find some way to check if that path exists
         """
@@ -206,7 +205,7 @@ class Archiver(object):
 
             # Try not to initialize object to download
             >>> dst_dir = os.path.join(os.getcwd() + os.path.sep + "archives")
-            >>> curr_archiver = BA_Archiver.Fourchan("a", "1234567", dst_dir)
+            >>> curr_archiver = BA_Archiver.Fourchan.Archiver("a", "1234567", dst_dir)
             >>> curr_archiver.download_file("12345.jpg", dst_dir, "http:/i.imgur.com/12345.jpg")
         """
         # Destination of downloaded file
@@ -260,13 +259,12 @@ class Archiver(object):
 
 
 
-    def dump_css(self):
+    def dump_css(self, dst_dir):
         """
             Dumps the CSS from 4cdn.
             (FIXME) Currently uses a static list of links, which works but is not ideal.
             Eventually, we need to create a JSON HTML Templater system.
 
-            # variables from initialized object
             :param dst_dir: string, destination folder name (not path)
         """
         fourchan_css_url_regex = re.compile(HTTP_HEADER_UNIV + FOURCHAN_STATIC + FOURCHAN_CSS_REGEX)
@@ -283,16 +281,16 @@ class Archiver(object):
         for css_url in css_list:
             css_name = re.sub(fourchan_css_url_regex, "\\1.css", css_url)
             self.logging.info("Downloading %s" % (css_name))
-            self.download_file(css_name, self.dst_dir, css_url)
+            self.download_file(css_name, dst_dir, css_url)
 
 
 
-    def dump_html(self):
+    def dump_html(self, dst_dir):
         """
             Dumps thread in raw HTML format to `<thread-id>.html`
 
-            # variables from initialized object
             :param dst_dir: string, destination folder name (not path)
+            # variables from initialized object
             :param board: string, board name
             :param thread: string, thread id
         """
@@ -302,16 +300,16 @@ class Archiver(object):
         fourchan_thumbs_url_regex = re.compile(HTTP_HEADER_UNIV + "\d+." + FOURCHAN_THUMBS + FOURCHAN_THUMBS_REGEX)
         html_filename = "%s.html" % self.thread
         html_url = self.fourchan_boards_url % (self.board, self.thread)
-        self.download_file(html_filename, self.dst_dir, html_url)
+        self.download_file(html_filename, dst_dir, html_url)
         
         # Convert all links in HTML dump to use locally downloaded files
-        html_path = os.path.join(self.dst_dir, html_filename)
+        html_path = os.path.join(dst_dir, html_filename)
         self.file_replace(html_path, '"//', '"' + self.HTTP_HEADER)
         self.file_replace(html_path, fourchan_images_url_regex, _IMAGE_DIR_NAME + "/")
         self.file_replace(html_path, fourchan_thumbs_url_regex, _THUMB_DIR_NAME + "/")
         
         # Download a local copy of all CSS files
-        dst_css_dir = os.path.join(self.dst_dir, _CSS_DIR_NAME)
+        dst_css_dir = os.path.join(dst_dir, _CSS_DIR_NAME)
         self.make_sure_path_exists(dst_css_dir)
         dump_css(dst_css_dir)
         
@@ -321,17 +319,17 @@ class Archiver(object):
 
 
 
-    def dump_json(self):
+    def dump_json(self, dst_dir):
         """
             Grab thread JSON from 4chan API
 
-            # variables from initialized object
             :param dst_dir: string, destination folder name (not path)
+            # variables from initialized object
             :param board: string, board name
             :param thread: string, thread id
         """
         json_filename = "%s.json" % self.thread
-        json_path = os.path.join(self.dst_dir, json_filename)
+        json_path = os.path.join(dst_dir, json_filename)
         self.logging.info("Dumping %s.json..." % (self.thread))
         
         json_thread = requests.get(self.fourchan_api_url % (self.board, self.thread))
@@ -339,18 +337,19 @@ class Archiver(object):
 
 
 
-    def list_external_links(self):
+    def list_external_links(self, dst_dir):
         """
             Get all external links quoted in comments
+
+            :param dst_dir: string, destination folder name (not path)
             # variables from initialized object
             :param curr_thread: py4chan Thread object
-            :param dst_dir: string, destination folder name (not path)
         """
         # `The Ultimate URL Regex` <http://stackoverflow.com/questions/520031/whats-the-cleanest-way-to-extract-urls-from-a-string-using-python>_
         linkregex = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
 
         # File to store list of all external links quoted in comments (overwrite upon each loop iteration)
-        linklist_dst = os.path.join(self.dst_dir, EXT_LINKS_FILENAME)
+        linklist_dst = os.path.join(dst_dir, EXT_LINKS_FILENAME)
         linklist_file = open(linklist_dst, "w")
 
         for reply in self.curr_thread.replies:
@@ -371,14 +370,14 @@ class Archiver(object):
         linklist_file.close()
 
 
-    def get_images(self):
+    def get_images(self, dst_dir):
         """
             Download all images
             :param curr_thread: py4chan Thread object
             :param dst_dir: string, destination folder name (not path)
         """
         # Create and set destination folders
-        dst_images_dir = os.path.join(self.dst_dir, _IMAGE_DIR_NAME)
+        dst_images_dir = os.path.join(dst_dir, _IMAGE_DIR_NAME)
         self.make_sure_path_exists(dst_images_dir)
 
         # regex for obtaining filenames from py4chan (new py4chan)
@@ -397,7 +396,7 @@ class Archiver(object):
             image_name = re.sub(fourchan_images_url_regex, '', image_url)
             self.download_file(image_name, dst_images_dir, image_url)
 
-    def get_thumbs(self):
+    def get_thumbs(self, dst_dir):
         """
             Download all thumbnails
             :param curr_thread: py4chan Thread object
@@ -421,21 +420,22 @@ class Archiver(object):
 
 
 
-    def dump(self, nothumbs=False, thumbsonly=False):
+    def dump(self, dst_dir, nothumbs=False, thumbsonly=False):
         """ 
             Dump the thread using the functions defined above
+            :param dst_dir: string, destination folder name (not path)
             :param nothumbs: bool, get thumbnails or not. (optional)
             :param thumbsonly: bool, only get thumbnails. (optional)
 
             >>> dst_dir = os.path.join(os.getcwd() + os.path.sep + "archives")
-            >>> curr_archiver = BA_Archiver.Fourchan("a", "1234567", dst_dir)
+            >>> curr_archiver = BA_Archiver.Fourchan.Archiver("a", "1234567", dst_dir)
             >>> curr_archiver.dump()
             >>> curr_archiver.dump(thumbsonly=True)
             # find some way to verify that the thread was dumped
 
         """
         # Create paths if they don't exist
-        self.make_sure_path_exists(self.dst_dir)
+        self.make_sure_path_exists(dst_dir)
 
         # log current thumbsonly or nothumbs value
         if (thumbsonly):
@@ -453,13 +453,13 @@ class Archiver(object):
             self.get_thumbs(self.curr_thread, dst_dir)
         
         # Get all external links quoted in comments
-        self.list_external_links()
+        self.list_external_links(dst_dir)
 
         # Dumps thread in raw HTML format to `<thread-id>.html`
-        self.dump_html()
+        self.dump_html(dst_dir)
         
         # Dumps thread in JSON format to `<thread-id>.json` file, pretty printed
-        self.dump_json()
+        self.dump_json(dst_dir)
 
     def __repr__(self):
         return '<BA_Archiver.Fourchan - /Board/Thread: /%s/%s>' % (self.board, self.thread)
