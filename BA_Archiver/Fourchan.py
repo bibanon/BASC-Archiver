@@ -230,7 +230,7 @@ class Archiver(object):
             File in place regex function
             originally scripted by steveha on StackOverflow
             http://stackoverflow.com/questions/1597649/replace-strings-in-files-by-python
-            Notice: `\1` notation could be interpreted by python as `\x01`! Escape it with a second backslash: `\\1`
+            Notice: all parameters are recommended to be in r"raw strings"
 
             :param fname: filename string
             :param pat: regex pattern to search for, as a string
@@ -279,7 +279,7 @@ class Archiver(object):
         self.HTTP_HEADER + FOURCHAN_STATIC + "/css/tomorrow.473.css"]
         
         for css_url in css_list:
-            css_name = re.sub(fourchan_css_url_regex, "\\1.css", css_url)
+            css_name = re.sub(fourchan_css_url_regex, r"\1.css", css_url)
             self.logging.info("Downloading %s" % (css_name))
             self.download_file(css_name, dst_dir, css_url)
 
@@ -315,7 +315,7 @@ class Archiver(object):
         
         # convert HTML links to use local CSS files that we just downloaded
         # (FIXME) Might want to mod the HTML to use only ONE CSS file (perhaps by option)
-        self.file_replace(html_path, HTTP_HEADER_UNIV + FOURCHAN_STATIC + FOURCHAN_CSS_REGEX, _CSS_DIR_NAME + "/\\1.css")
+        self.file_replace(html_path, HTTP_HEADER_UNIV + FOURCHAN_STATIC + FOURCHAN_CSS_REGEX, _CSS_DIR_NAME + r"/\1.css")
 
 
 
