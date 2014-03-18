@@ -20,6 +20,7 @@
 import os
 import time
 import errno
+import re
 
 import py4chan
 import BA_Archiver.Fourchan
