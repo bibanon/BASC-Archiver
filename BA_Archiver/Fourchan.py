@@ -20,6 +20,7 @@ import time
 import json
 import re
 import errno
+import fileinput
 import requests
 import py4chan
 
@@ -174,7 +175,7 @@ class Archiver(object):
         if (self.dump_complete):
             return True
 
-    def make_sure_path_exists(path):
+    def make_sure_path_exists(self, path):
         """
             Recursively create folder paths if they don't exist 
             (update) with `os.makedirs(path,exist_ok=True)` in python3
@@ -195,7 +196,7 @@ class Archiver(object):
 
 
 
-    def download_file(fname, dst_folder, file_url, overwrite=False):
+    def download_file(self, fname, dst_folder, file_url, overwrite=False):
         """
             Download any file using requests, in chunks.
             :param fname: filename string
@@ -229,7 +230,7 @@ class Archiver(object):
 
 
 
-    def file_replace(fname, pat, s_after):
+    def file_replace(self, fname, pat, s_after):
         """
             File in place regex function
             originally scripted by steveha on StackOverflow
@@ -298,7 +299,7 @@ class Archiver(object):
         # Download a local copy of all CSS files
         dst_css_dir = os.path.join(dst_dir, _CSS_DIR_NAME)
         self.make_sure_path_exists(dst_css_dir)
-        dump_css(dst_css_dir)
+        self.dump_css(dst_css_dir)
         
         # convert HTML links to use local CSS files that we just downloaded
         # (FIXME) Might want to mod the HTML to use only ONE CSS file (perhaps by option)
@@ -433,12 +434,12 @@ class Archiver(object):
             self.logging.info("--nothumbs : " + nothumbs)
 
         # Choose whether to download images
-        if (self.thumbsonly == False):
-            self.get_images(self.curr_thread, dst_dir)
+        if (thumbsonly == False):
+            self.get_images(dst_dir)
 
         # Choose whether to download thumbnails
-        if (self.thumbsonly or (nothumbs == False)):
-            self.get_thumbs(self.curr_thread, dst_dir)
+        if (thumbsonly or (nothumbs == False)):
+            self.get_thumbs(dst_dir)
         
         # Get all external links quoted in comments
         self.list_external_links(dst_dir)
