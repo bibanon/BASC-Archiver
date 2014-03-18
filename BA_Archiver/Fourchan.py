@@ -241,25 +241,8 @@ class Archiver(object):
             :param s_after: what to replace pattern in file with, string
         """
 
-        # first, see if the pattern is even in the file.
-        with open(fname) as f:
-            if not any(re.search(pat, line) for line in f):
-                # pattern does not occur in file so we are done.
-                self.logging.debug("Regex pattern '%s' not found in %s" % (pat, fname))
-                return
-
-        # pattern is in the file, so perform replace operation.
-        with open(fname) as f:
-            out_fname = fname + ".tmp"
-            out = open(out_fname, "w")
-            for line in f:
-                self.logging.info("Replacing all '%s' patterns with '%s' in %s" % (pat, s_after, fname))
-                out.write(re.sub(pat, s_after, line))
-            out.close()
-            # FIXME Works on Linux only. Has a rename error in Windows
-            self.logging.info("Saving modified file to %s" % fname)
-            os.remove(fname)            # delete original file
-            os.rename(out_fname, fname)
+        for line in fileinput.input(fname, inplace=True):
+            print(re.sub(pat, s_after, line))
 
 
 
@@ -304,7 +287,7 @@ class Archiver(object):
         fourchan_thumbs_url_regex = re.compile(HTTP_HEADER_UNIV + "\d+." + FOURCHAN_THUMBS + FOURCHAN_THUMBS_REGEX)
         html_filename = "%s.html" % self.thread
         html_url = self.fourchan_boards_url % (self.board, self.thread)
-        self.download_file(html_filename, dst_dir, html_url)
+        self.download_file(html_filename, dst_dir, html_url, overwrite=True)
         
         # Convert all links in HTML dump to use locally downloaded files
         html_path = os.path.join(dst_dir, html_filename)
