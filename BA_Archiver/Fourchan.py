@@ -20,8 +20,7 @@ import time
 import json
 import re
 import errno
-#import requests
-import requests0 as requests
+import requests
 import py4chan
 
 # Setup logging: http://victorlin.me/posts/2012/08/good-logging-practice-in-python/
@@ -196,12 +195,13 @@ class Archiver(object):
 
 
 
-    def download_file(fname, dst_folder, file_url):
+    def download_file(fname, dst_folder, file_url, overwrite=False):
         """
-            (FIXME) Download any file using requests0. Needs update
+            Download any file using requests, in chunks.
             :param fname: filename string
             :param dst_folder: output folder string
             :param file_url: url to download from, string
+            :param overwrite: Overwrite any existing files, bool
 
             # Try not to initialize object to download
             >>> dst_dir = os.path.join(os.getcwd() + os.path.sep + "archives")
@@ -210,18 +210,22 @@ class Archiver(object):
         """
         # Destination of downloaded file
         file_dst = os.path.join(dst_folder, fname)
-        
+
         # If the file doesn't exist, download it
-        if not os.path.exists(file_dst):
+        if ( not os.path.exists(file_dst) ) or overwrite:
             self.logging.info('%s downloading...' % fname)
             i = requests.get(file_url)
+
             if i.status_code == 404:
-                self.logging.info('Download failed, try again later (%s)' % file_url)
+                self.logging.info('Failed, try later (%s)' % file_url)
             else:
-                # download the file
-                open(file_dst, 'w').write(i.content)
+                # download file in chunks of 1KB
+                with open(file_dst, 'wb') as fd:
+                    for chunk in i.iter_content(chunk_size=1024):
+                        fd.write(chunk)
+
         else:
-            self.logging.info('%s already downloaded' % fname)
+          self.logging.info('%s already downloaded' % fname)
 
 
 
@@ -331,9 +335,10 @@ class Archiver(object):
         json_filename = "%s.json" % self.thread
         json_path = os.path.join(dst_dir, json_filename)
         self.logging.info("Dumping %s.json..." % (self.thread))
+        json_url = self.HTTP_HEADER + self.fourchan_api_url % (self.board, self.thread)
         
-        json_thread = requests.get(self.fourchan_api_url % (self.board, self.thread))
-        json.dump(json_thread.json, open(json_path, 'w'), sort_keys=True, indent=2, separators=(',', ': '))
+        json_thread = requests.get(json_url)
+        json.dump(json_thread.json(), open(json_path, 'w'), sort_keys=True, indent=2, separators=(',', ': '))
 
 
 
