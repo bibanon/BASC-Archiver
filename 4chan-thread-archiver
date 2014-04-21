@@ -80,7 +80,7 @@ def check_url(url):
       Make sure that the given URL is a valid 4chan thread URL.
       Originates from The Chandler by Dhole
   """
-  url_parsed = re.findall("http(?:s)?://(?:boards.)?.*/*/res/[0-9]*(?:.php|.html)?", url)
+  url_parsed = re.findall("http(?:s)?://(?:boards.)?.*/*/(?:res|thread)/[0-9]+(?:.php|.html)?", url)
   if len(url_parsed) < 1:
     return ""
   else:
