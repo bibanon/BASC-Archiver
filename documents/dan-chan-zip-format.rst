@@ -57,25 +57,25 @@ A typical ``manifest.json`` file is laid out as such:
 .. code:: json
 
     {
-        'thread': {
-            'title': 'Thread Title',
-            'op': {
-                'name': 'Some Guy',
-                'email': 'a@example.com'
+        "thread": {
+            "title": "Thread Title",
+            "op": {
+                "name": "Some Guy",
+                "email": "a@example.com"
             },
-            'sticky': true
+            "sticky": true
         }
-        'created': {
-            'site': '4chan',
-            'board': 'etc',
-            'thread_id': 123123,
-            'datetime': '2014-03-12 21:42:06',
-            'timestamp': 49732497592874,
+        "created": {
+            "site": "4chan",
+            "board": "etc",
+            "thread_id": 123123,
+            "datetime": "2014-03-12 21:42:06",
+            "timestamp": 49732497592874,
         },
-        'archived': {
-            'site': 'archive.moe',
-            'datetime': '2014-05-17 14:24:53',
-            'timestamp': 9867378547236,
+        "archived": {
+            "site": "archive.moe",
+            "datetime": "2014-05-17 14:24:53",
+            "timestamp": 9867378547236,
         }
     }
 
