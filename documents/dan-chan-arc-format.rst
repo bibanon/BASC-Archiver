@@ -1,9 +1,9 @@
-.chan.zip File Format
+.chan.arc File Format
 =====================
 
 Abstract
 --------
-This document specifies the ``.chan.zip`` file extension. This format is designed to provide a simple, standard way to represent and transport archives of imageboard threads.
+This document specifies the ``.chan.arc`` file extension. This format is designed to provide a simple, standard way to represent and transport archives of imageboard threads.
 
 This format has been created primarily for 4chan threads, but aims to cleanly store threads from other decently compatible image boards (as well as from other imageboard archives themselves).
 
@@ -20,6 +20,20 @@ Many completely seperate methods of archiving image board threads have been deve
 With this format, we hope to create a standard way to store image board threads so that we can be able to, say, import threads from a bunch of different archives into a single, unified display and management system.
 
 To start off with, we will be describing a standard manifest of thread information and a standard folder structure for archives. We do, however, want to also describe a standard way to store the topic and reply posts as well as any other information required to recreate the page from a basic template, further on.
+
+Compression
+-----------
+The ``.arc`` part of the standard name refers to some form of archive compression. The two standard forms of ``.chan.arc`` compression are listed below:
+
+* ``7zip``
+
+    This format refers to 7zip, a very good open source compression format. Due to the high level of compression of this format, this is the recommended way to compress ``chan.arc`` archives. Archives compressed with this format should have the file extension ``chan.7z``.
+
+* ``zip``
+
+    This format refers to PKZIP, the standard archive format for Windows-based systems. While this format has not proven itself the absolute best for compression's sake, there is a large ecosystem of tools and libraries already familiar with this format, and it is quite simple to decompress and extract files from this. Archives compressed with this format should have the file extension ``chan.zip``.
+
+Other archive formats may be used, but this is not recommended.
 
 Folder Structure
 ----------------
@@ -83,7 +97,7 @@ A typical ``manifest.json`` file is laid out as such:
 
 **arc_version**
 
-This key lists the version of the ``chan.zip`` format that this archive conforms to. Right now, this version string is ``draft-01``, where ``01`` will be incremented for newer version of this chan archive draft.
+This key lists the version of the ``chan.arc`` format that this archive conforms to. Right now, this version string is ``draft-01``, where ``01`` will be incremented for newer version of this chan archive draft.
 
 The final format of this string is not yet decided, but will be closer to the final release of this specification.
 
@@ -126,7 +140,7 @@ This lists the site the thread was archived from, as well as the time and date o
 **created/archived keys**
 
 * ``site``
-    
+
     This is a simplified representation of the site name and should be fairly easy to guess for most sites. This is usually the part of the domain name before the TLD. As an example, ``4chan.org`` becomes ``4chan``. However, this may be whatever best represents the given site.
 
     In another example, the archival website ``archive.moe``'s site key would be ``archive.moe``, since a shortening cannot properly represent the site name. It may contain numbers, lowercase letters, dots, dashes, and underscores. It may not contain spaces or any other character not mentioned.
@@ -144,11 +158,11 @@ This lists the site the thread was archived from, as well as the time and date o
     This is the id of the thread. Generally, this is the id of the topic post (OP), or the first post of the thread. This is an integer.
 
 * ``datetime``
-    
+
     This is a human-readable representation of the given time, taking the format ``YYYY-MM-DD hh:mm:ss``. This is recommended to be in Coordinated Universal Time (UTC).
 
 * ``timestamp``
-    
+
     This is a unix timestamp representing the given time. This is primarily a machine-readable representation, and is recommended to be in Coordinated Universal Time (UTC).
 
 
