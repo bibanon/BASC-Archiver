@@ -81,15 +81,15 @@ A typical ``manifest.json`` file is laid out as such:
 
 **thread**
 
-This contains information about the thread. Useful metadata which may be extracted at archive time.
+This contains information about the thread. These should be generated at archive time. Subkeys may be excluded if the information does not or cannot be extracted at archive time. This key itself may be excluded if there are no subkeys.
 
 * ``title``
 
-    This contains the title of the given thread. It is a string, containing any characters necessary. This is auto-generated at archive time.
+    This contains the title of the given thread. It is a string, containing any characters necessary.
 
 * ``op``
 
-    This contains information about the posted who created the thread, if it exists, including the name and email address attached to the post. These are strings, containing any characters necessary. These are optional, and may be excluded if the information does not exist at archive time.
+    This contains information about the posted who created the thread, if it exists, including the name and email address attached to the post. These are strings, containing any characters necessary. These are optional, and may be excluded if the information does not exist.
 
 * ``sticky``
 
