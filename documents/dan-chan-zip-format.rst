@@ -62,7 +62,8 @@ A typical ``manifest.json`` file is laid out as such:
             "title": "Thread Title",
             "op": {
                 "name": "Some Guy",
-                "email": "a@example.com"
+                "email": "a@example.com",
+                "tripcode": "#coolDuD3"
             },
             "sticky": true
         },
@@ -96,11 +97,23 @@ This contains information about the thread. These should be generated at archive
 
 * ``op``
 
-    This contains information about the posted who created the thread, if it exists, including the name and email address attached to the post. These are strings, containing any characters necessary. These are optional, and may be excluded if the information does not exist.
+    This contains information about the posted who created the thread. These may be excluded if the information does not exist or cannot be extracted, but this is not recommended. The subkeys are detailed below.
+
+    * ``name``
+
+        This key contains what is in the ``name`` field of the topic post of the thread. This is a string, and can contain any characters the original site supports in its name field.
+
+    * ``email``
+
+        This key contains what is in the ``email`` field of the topic post of the thread. This is a string, and can contain any characters the original site supports in its name field. It is important to note that this may contain a string that is not a valid email address. This is by design, as some sites let users post with this in their email field.
+
+    * ``tripcode``
+
+        This key contains what the ``tripcode`` of the topic post of the thread is displayed as. This may contain a standard tripcode or a secure tripcode, depending on what is supported by the base site and what the post contains. This is a string that can contain any characters necessary to represent the generated tripcode, but is expected to conform to standard tripcode formats. Leading and trailing whitespace should be stripped from this field.
 
 * ``sticky``
 
-    This represents whether the post is a 'sticky' post. That is, whether the site management has 'stuck' it to the top of the image board. It may contain the value ``true`` or ``false``, and is to be generated at archive time.
+    This boolean represents whether the post is a 'sticky' post. That is, whether the site management has 'stuck' it to the top of the image board. It may contain the value ``true`` or ``false``, and is generated at archive time.
 
 **created**
 
