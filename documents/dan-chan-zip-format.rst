@@ -64,7 +64,7 @@ A typical ``manifest.json`` file is laid out as such:
                 "email": "a@example.com"
             },
             "sticky": true
-        }
+        },
         "created": {
             "site": "4chan",
             "board": "etc",
