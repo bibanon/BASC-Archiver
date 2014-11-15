@@ -8,7 +8,7 @@ to download thread images and/or thumbnails, along with thread HTML, JSON,
 and a list of referenced external links.
 
 Usage:
-  4chan-thread-archiver <url>... [--path=<string>] [--runonce] [--silent] [--delay=<int>] [--nothumbs] [--thumbsonly] [--ssl]
+  4chan-thread-archiver <url>... [--path=<string>] [--runonce] [--silent] [--verbose] [--delay=<int>] [--nothumbs] [--thumbsonly] [--ssl]
   4chan-thread-archiver -h | --help
   4chan-thread-archiver -v | --version
 
@@ -20,6 +20,7 @@ Options:
   --thumbsonly                  Download thumbnails, no images
   --ssl                         Download using HTTPS
   --silent                      Suppresses mundane printouts, prints what's important
+  --verbose                     Printout more information than normal
   -h --help                     Show help
   -v --version                  Show version
 """
@@ -32,7 +33,7 @@ from basc_archiver import _version, Options, Archiver
 if __name__ == '__main__':
     args = docopt(__doc__, version=_version)
 
-    options = Options(args['--path'], args['--ssl'], silent=args['--silent'],
+    options = Options(args['--path'], args['--ssl'], silent=args['--silent'], verbose=args['--verbose'],
                       skip_thumbs=args['--nothumbs'], thumbs_only=args['--thumbsonly'])
     archiver = Archiver(options)
 

@@ -11,11 +11,12 @@ _default_base_dir = './archive'
 
 class Options:
     """Holds Archiver options."""
-    def __init__(self, base_dir, use_ssl=False, silent=False,
+    def __init__(self, base_dir, use_ssl=False, silent=False, verbose=False,
                  skip_thumbs=False, thumbs_only=False):
         self.base_dir = base_dir
         self.use_ssl = use_ssl
         self.silent = silent
+        self.verbose = verbose
         self.skip_thumbs = skip_thumbs
         self.thumbs_only = thumbs_only
 

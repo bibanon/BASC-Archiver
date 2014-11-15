@@ -129,9 +129,10 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             for image_url in thread['thread'].Files():
                 image_name = re.sub(FOURCHAN_IMAGES_URL_REGEX, '', image_url)
                 local_filename = os.path.join(image_dir, image_name)
-                if utils.download_file(local_filename, image_url):
-                    if not self.options.silent:
-                        print('  downloaded image', image_name)
+                if not os.path.exists(local_filename):
+                    if utils.download_file(local_filename, image_url):
+                        if not self.options.silent:
+                            print('  downloaded image', image_name)
 
         # thumbs
         if self.options.thumbs_only or not self.options.skip_thumbs:
@@ -141,9 +142,10 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             for image_url in thread['thread'].Thumbs():
                 thumb_name = re.sub(FOURCHAN_THUMBS_URL_REGEX, '', image_url)
                 local_filename = os.path.join(thumb_dir, thumb_name)
-                if utils.download_file(local_filename, image_url):
-                    if not self.options.silent:
-                        print('  downloaded thumbnail', thumb_name)
+                if not os.path.exists(local_filename):
+                    if utils.download_file(local_filename, image_url):
+                        if not self.options.silent:
+                            print('  downloaded thumbnail', thumb_name)
 
         # record external urls
         external_urls_filename = os.path.join(thread['dir'], EXT_LINKS_FILENAME)
