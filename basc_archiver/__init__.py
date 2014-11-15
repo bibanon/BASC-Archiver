@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# BASC Imageboard Archiver
+from __future__ import print_function
+
+from .sites import default_archivers
+
+_version = 0.4
+_default_base_dir = './archive'
+
+
+class Options:
+    """Holds Archiver options."""
+    def __init__(self, base_dir, use_ssl=False, silent=False,
+                 skip_thumbs=False, thumbs_only=False):
+        self.base_dir = base_dir
+        self.use_ssl = use_ssl
+        self.silent = silent
+        self.skip_thumbs = skip_thumbs
+        self.thumbs_only = thumbs_only
+
+
+class Archiver:
+    """Archives the given imageboard threads."""
+    def __init__(self, options=None):
+        if options is None:
+            options = Options(_default_base_dir)
+        self.options = options
+
+        # add our default site-specific archivers
+        self.archivers = []
+        for archiver in default_archivers:
+            self.archivers.append(archiver(self.options))
+        
+    def add_thread(self, url):
+        """Archive the given thread if possible"""
+        url_archived = False
+        for archiver in self.archivers:
+            if archiver.url_valid(url):
+                archiver.add_thread(url)
+                url_archived = True
+        
+        if url_archived:
+            return True
+        else:
+            print('We could not find a valid archiver for:', url)
+            return False
+    
+    def download_threads(self):
+        """Download all the threads we currently hold."""
+        for archiver in self.archivers:
+            archiver.download_threads()
