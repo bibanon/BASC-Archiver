@@ -57,6 +57,7 @@ A typical ``manifest.json`` file is laid out as such:
 .. code:: json
 
     {
+        "arc_version": "draft-01",
         "thread": {
             "title": "Thread Title",
             "op": {
@@ -78,6 +79,12 @@ A typical ``manifest.json`` file is laid out as such:
             "timestamp": 9867378547236,
         }
     }
+
+**arc_version**
+
+This key lists the version of the ``chan.zip`` format that this archive conforms to. Right now, this version string is ``draft-01``, where ``01`` will be incremented for newer version of this chan archive draft.
+
+The final format of this string is not yet decided, but will be closer to the final release of this specification.
 
 **thread**
 
