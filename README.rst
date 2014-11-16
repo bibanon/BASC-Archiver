@@ -109,12 +109,16 @@ However, all the original has long since been replaced, and the scripts are tota
 * More comments in code
 * Support for new 4cdn.org server
 
-More info and a full journal can be found in ``documents/log.md``.
+More info and a full journal can be found in `documents/creation-log.md <documents/creation-log.md>`_ .
 
 License
 =======
 
-The 4chan Archiver Class is based on Bibliotheca Anonoma `BA-4chan-thread-archive <https://github.com/bibanon/BA-4chan-thread-archiver>`_ tool, and was originally forked from Socketub's `4chan-thread-archiver. <https://github.com/socketubs/4chan-thread-archiver>`_ The original license of Socketub's archiver is the GNU Affero General Public License v3 or later.
+Copyright (C) 2014  Antonizoon Overtwater
+License LGPLv3-only:
+GNU Lesser GPL version 3 <http://gnu.org/licenses/lgpl-3.0.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
 
 Wishlist
 =========
