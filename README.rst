@@ -38,7 +38,7 @@ Windows
 
 ::
 
-    pip install BASC-thread-archiver
+    pip install BASC-Archiver
     
 4. Open up a command prompt and navigate to the folder where the python scripts are stored. (In this example we assume it is **Python33**. Check the root of your C drive if it isn't)
 
@@ -56,7 +56,7 @@ Windows
 
 ::
 
-    pip install BASC-thread-archiver --upgrade
+    pip install BASC-Archiver --upgrade
 
 Linux/Mac
 ---------
@@ -67,7 +67,7 @@ Linux/Mac
 ::
 
     sudo apt-get install python3-pip python3-requests
-    sudo pip3 install BASC-thread-archiver
+    sudo pip3 install BASC-Archiver
 
 3. Navigate your terminal to the folder you wish to save the threads into, and run the command below to download an entire thread. (you may also manually specify a path, using the **--path=** argument)
 
@@ -79,7 +79,7 @@ Linux/Mac
 
 ::
 
-    sudo pip3 install BASC-thread-archiver --upgrade
+    sudo pip3 install BASC-Archiver --upgrade
 
 Where to Post Archived threads
 ===============================
@@ -114,7 +114,7 @@ More info and a full journal can be found in ``documents/log.md``.
 License
 =======
 
-The 4chan Archiver Class is based on Bibliotheca Anonoma `BA-4chan-thread-archive tool <https://github.com/bibanon/BA-4chan-thread-archiver>`, and was originally forked from Socketub's `4chan-thread-archiver. <https://github.com/socketubs/4chan-thread-archiver>`_ The original license of Socketub's archiver is the GNU Affero General Public License v3 or later.
+The 4chan Archiver Class is based on Bibliotheca Anonoma `BA-4chan-thread-archive <https://github.com/bibanon/BA-4chan-thread-archiver>`_ tool, and was originally forked from Socketub's `4chan-thread-archiver. <https://github.com/socketubs/4chan-thread-archiver>`_ The original license of Socketub's archiver is the GNU Affero General Public License v3 or later.
 
 Wishlist
 =========

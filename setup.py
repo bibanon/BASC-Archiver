@@ -24,7 +24,7 @@ setup(
     long_description=long_description,
     author='Antonizoon Overtwater <antonizoon@bibanon.org>, Daniel Oaks <daniel@danieloaks.net>',
     author_email='antonizoon@bibanon.org',
-    url='https://github.com/DanielOaks/BASC-thread-archiver',
+    url='https://github.com/DanielOaks/BASC-Archiver',
     packages=['basc_archiver', 'basc_archiver.sites'],
     package_dir={
         'basc_archiver': 'basc_archiver',
