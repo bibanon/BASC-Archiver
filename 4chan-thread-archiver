@@ -1,21 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# BA 4chan-thread-archiver
-#
-# Built for the Bibliotheca Anonoma by Antonizoon Overtwater, 2012/04/04
-# Rewritten from scratch to use py4chan API wrapper, save in seperate images folder, download plain HTML, modularization, comments, and code cleanup
-# Formerly based on https://github.com/socketubs/4chandownloader
+"""
+    BA Archiver - 4chan-thread-archiver
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#
-# Initial release Nov. 5, 2009
-# v6 release Jan. 20, 2009
-# http://cal.freeshell.org
-#
-# Refactor, update and Python package
-# by Socketubs (http://socketubs.net/)
-# 09-08-12
-#
+    ../4chan-thread-archiver.py
+
+    Uses the 4chan API (with the py4chan wrapper) to download thread images
+    and/or thumbnails, along with thread HTML, JSON, and a list of referenced
+    external links.
+
+"""
 
 import os
 import time
@@ -70,21 +66,21 @@ def timestamp():
     """ 
         `Timestamp` <http://www.interfaceware.com/manual/timestamps_with_milliseconds.html>_
     """
-    
+
     now = time.time()
     localtime = time.localtime(now)
     return time.strftime('%Y-%m-%d %H:%M:%S', localtime)
 
 def check_url(url):
-  """
-      Make sure that the given URL is a valid 4chan thread URL.
-      Originates from The Chandler by Dhole
-  """
-  url_parsed = re.findall("http(?:s)?://(?:boards.)?.*/*/res/[0-9]*(?:.php|.html)?", url)
-  if len(url_parsed) < 1:
-    return ""
-  else:
-    return url_parsed[0]
+    """
+        Make sure that the given URL is a valid 4chan thread URL.
+        Originates from The Chandler by Dhole
+    """
+    url_parsed = re.findall("http(?:s)?://(?:boards.)?.*/*/res/[0-9]*(?:.php|.html)?", url)
+    if len(url_parsed) < 1:
+      return ""
+    else:
+      return url_parsed[0]
 
 
 
@@ -118,7 +114,7 @@ def main(args):
     # Set a default path if none is given
     if (path == None):
       path = os.path.join(os.getcwd() + os.path.sep + _DEFAULT_FOLDER)
-      
+
     # Set destination directory
     dst_dir = os.path.join(path, board, thread)
 
@@ -136,42 +132,42 @@ def main(args):
     try:
       # Switch to check for first run
       first_iteration = True
-      
+
       while 1:
         # don't run this code the first time
         if (first_iteration == False):
-          
+
           # Wait to execute code again
           print("\n" + _TAG + "Waiting %s seconds before retrying (Type Ctrl-C to stop)" % delay)
           time.sleep(int(delay))
-          
+
           if curr_thread.is_404:
             # Stop when thread gets 404'ed
             print(_TAG + "%s - [Thread 404'ed or Connection Lost]" % timestamp())
             print(" :: Dump complete. To resume dumping the same thread,\nrun this script again.")
             raise SystemExit(0)
-            
-          
+
+
           # Update thread and check if new replies have appeared
           new_replies = curr_thread.update()
           if (new_replies == 0):
             print(_TAG + "%s - [No new posts.]" % timestamp())
             continue
-          
+
           else:
             print(_TAG + "%s - [%s new post(s) found!]" % (timestamp(), new_replies))
-            
+
           # If all tests are OK, dump thread again
           curr_archiver.dump(dst_dir, nothumbs, thumbsonly)
-              
+
         else:
           # dump thread for the first time
           print(_TAG + "Dumping the thread...")
           curr_archiver.dump(dst_dir, nothumbs, thumbsonly)
-          
+
           # first iteration is complete
           first_iteration = False
-          
+
     except KeyboardInterrupt:
       """
           Stop try/except loop when [Ctrl-C] is pressed
