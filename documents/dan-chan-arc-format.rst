@@ -55,6 +55,9 @@ This is a reference example of an archived thread::
             /embedded_file_b.css
         /embedded_file.js
         /favicon.png
+    /warc
+        warc_01.warc.gz
+        warc_01.cdx
     /raw
         api.json
         raw_file_a.ext
@@ -181,6 +184,10 @@ This folder contains the original thumbnails posted in the thread. This folder m
 resources/
 ^^^^^^^^^^
 This folder contains resources linked by the ``index.html`` file. This folder may have subdirectories. It is only recommended to create subdirectories if the created folder will have more than a single file. The recommended subdirectories include ``css``, ``js``, and ``images``. If the favicon is a single file, it should be put in the root ``resources/`` directory as shown. If there are multiple favicon files, they should be put in a ``resources/favicons/`` folder.
+
+warc/
+^^^^^
+This folder is for storing files in the Web ARChive file format. These files may take any file name deemed appropriate, depending on how the archiver downloads and stores these files. Storing WARC files allow external archives such as the `Wayback Machine <http://archive.org/web/>`_ to import thread information and allow users to browse the thread exactly as it existed at archive time. This directory and storing WARC files is recommended, but not required.
 
 raw/
 ^^^^
