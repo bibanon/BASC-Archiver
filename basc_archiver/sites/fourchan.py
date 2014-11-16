@@ -85,8 +85,8 @@ class FourChanSiteArchiver(BaseSiteArchiver):
         running_board = self.boards[board_name]
 
         if not running_board.threadExists(thread_id):
-            print('Thread {}/{} does not exist'.format(board_name, thread_id))
-            print("Either the thread already 404'ed, your URL is incorrect, or you aren't connected to the internet")
+            print('4chan Thread /{}/{} does not exist.'.format(board_name, thread_id))
+            print("Either the thread already 404'ed, your URL is incorrect, or you aren't connected to the internet.")
             return False
 
         # add thread to download list
@@ -106,7 +106,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 return True
             elif thread['thread'].is_404:
                 # thread 404'd
-                print("Thread {}/{} 404'd".format(thread['board'], thread['id']))
+                print("Thread /{}/{} 404'd.".format(thread['board'], thread['id']))
                 del self.threads[thread['id']]
                 return True
         else:
@@ -116,7 +116,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
         # download
         if not self.options.silent:
-            print('Downloading thread {}/{}'.format(thread['board'], thread['id']))
+            print('4chan Thread: /{}/{}'.format(thread['board'], thread['id']))
 
         utils.mkdirs(thread['dir'])
 
@@ -133,7 +133,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 if not os.path.exists(local_filename):
                     if utils.download_file(local_filename, image_url):
                         if not self.options.silent:
-                            print('  downloaded image', image_name)
+                            print('  Image:', image_name, 'downloaded.')
 
         # thumbs
         if self.options.thumbs_only or not self.options.skip_thumbs:
@@ -146,7 +146,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 if not os.path.exists(local_filename):
                     if utils.download_file(local_filename, image_url):
                         if not self.options.silent:
-                            print('  downloaded thumbnail', thumb_name)
+                            print('  Thumbnail:', thumb_name, 'downloaded.')
 
         # record external urls
         external_urls_filename = os.path.join(thread['dir'], EXT_LINKS_FILENAME)
@@ -175,7 +175,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
         if utils.download_json(local_filename, url, clobber=True):
             if not self.options.silent:
-                print('  downloaded thread json')
+                print('  Thread JSON downloaded.')
 
         # and output thread html file
         local_filename = os.path.join(thread['dir'], '{}.html'.format(thread['id']))
@@ -212,4 +212,4 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             utils.file_replace(local_filename, FOURCHAN_JS_URL_REGEX, _JS_DIR_NAME + '/')
 
             if not self.options.silent:
-                print('  downloaded thread html')
+                print('  Thread HTML downloaded.')
