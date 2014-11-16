@@ -72,6 +72,7 @@ def timestamp():
     return time.strftime('%Y-%m-%d %H:%M:%S', localtime)
 
 def check_url(url):
+<<<<<<< HEAD
     """
         Make sure that the given URL is a valid 4chan thread URL.
         Originates from The Chandler by Dhole
@@ -81,6 +82,17 @@ def check_url(url):
       return ""
     else:
       return url_parsed[0]
+=======
+  """
+      Make sure that the given URL is a valid 4chan thread URL.
+      Originates from The Chandler by Dhole
+  """
+  url_parsed = re.findall("http(?:s)?://(?:boards.)?.*/*/(?:res|thread)/[0-9]+(?:.php|.html)?", url)
+  if len(url_parsed) < 1:
+    return ""
+  else:
+    return url_parsed[0]
+>>>>>>> 5444874158e9f786e50555547aaae2af08604e3b
 
 
 
