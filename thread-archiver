@@ -2,27 +2,30 @@
 # -*- coding: utf-8 -*-
 # BASC Imageboard Archiver
 from __future__ import print_function
+from __future__ import absolute_import
 
-__doc__ = """BA-4chan-thread-archiver. Uses the 4chan API (with the py4chan wrapper) 
-to download thread images and/or thumbnails, along with thread HTML, JSON,
-and a list of referenced external links.
+__doc__ = """BASC-Archiver.
+
+Archives threads from 4chan and other imageboards, including images and/or
+thumbnails, thread HTML, JSON if available, and produces a list of
+referenced external links.
 
 Usage:
-  4chan-thread-archiver <url>... [--path=<string>] [--runonce] [--silent] [--verbose] [--delay=<int>] [--nothumbs] [--thumbsonly] [--ssl]
-  4chan-thread-archiver -h | --help
-  4chan-thread-archiver -v | --version
+  thread-archiver <url>... [--path=<string>] [--runonce] [--silent] [--verbose] [--delay=<int>] [--nothumbs] [--thumbsonly] [--ssl]
+  thread-archiver -h | --help
+  thread-archiver -v | --version
 
 Options:
-  --path=<string>               Path to folder where archives will be saved [default: ./archive]
-  --runonce                     Downloads the thread as it is presently, then exits
-  --delay=<int>                 Delay between thread checks [default: 20]
-  --nothumbs                    Don't download thumbnails
-  --thumbsonly                  Download thumbnails, no images
-  --ssl                         Download using HTTPS
-  --silent                      Suppresses mundane printouts, prints what's important
-  --verbose                     Printout more information than normal
-  -h --help                     Show help
-  -v --version                  Show version
+  --path=<string>     Path to folder where archives will be saved [default: ./archive]
+  --runonce           Downloads the thread as it is presently, then exits
+  --delay=<int>       Delay between thread checks [default: 20]
+  --nothumbs          Don't download thumbnails
+  --thumbsonly        Download thumbnails, no images
+  --ssl               Download using HTTPS
+  --silent            Suppresses mundane printouts, prints what's important
+  --verbose           Printout more information than normal
+  -h --help           Show help
+  -v --version        Show version
 """
 
 from docopt import docopt
