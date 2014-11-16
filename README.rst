@@ -128,8 +128,8 @@ Wishlist
 License
 =======
 
-The 4chan Archiver Class is jointly written and maintained by by `antonizoon.`_ <https://github.com/antonizoon> and `Daniel Oaks.`_ <https://github.com/DanielOaks>.
+The 4chan Archiver Class is jointly written and maintained by by `antonizoon <https://github.com/antonizoon>`_ and `Daniel Oaks <https://github.com/DanielOaks>`_.
 
 It is based on, and supersedes the Bibliotheca Anonoma's `BA-4chan-thread-archiver <https://github.com/bibanon/BA-4chan-thread-archiver>`_ tool, written by `antonizoon.`_ <https://github.com/antonizoon>.
 
-The BA-4chan-thread-archiver was originally forked from Socketub's `4chan-thread-archiver. <https://github.com/socketubs/4chan-thread-archiver>`_, originally licensed under the GNU Affero General Public License v3 or later.
+The BA-4chan-thread-archiver was originally forked from Socketub's `4chan-thread-archiver <https://github.com/socketubs/4chan-thread-archiver>`_, originally licensed under the GNU Affero General Public License v3 or later.
