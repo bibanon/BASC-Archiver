@@ -28,7 +28,7 @@ def download_file(local_filename, url, clobber=False):
 
         # if not exists
         if i.status_code == 404:
-            print('Downloading file failed:', local_filename, url)
+            print('Failed to download file:', local_filename, url)
             return False
 
         # write out in 1MB chunks
