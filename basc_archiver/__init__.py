@@ -51,3 +51,11 @@ class Archiver:
         """Download all the threads we currently hold."""
         for archiver in self.archivers:
             archiver.download_threads()
+
+    @property
+    def existing_threads(self):
+        """Return how many threads exist."""
+        threads = 0
+        for archiver in self.archivers:
+            threads += archiver.existing_threads
+        return threads

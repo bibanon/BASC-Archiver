@@ -28,6 +28,11 @@ class BaseSiteArchiver(object):
         for thread_id in dict(self.threads):
             self._download_thread(self.threads[thread_id])
 
+    @property
+    def existing_threads(self):
+        """Return how many threads we have and are downloading."""
+        return len(self.threads)
+
     def _download_thread(self, thread_info):
         """Download the given thread, from the thread info."""
         raise Exception('you must override this method')

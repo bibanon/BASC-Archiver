@@ -41,6 +41,11 @@ if __name__ == '__main__':
     for url in args['<url>']:
         archiver.add_thread(url)
 
+    if archiver.existing_threads < 1:
+        print('')
+        print('We could not find any of the supplied threads, exiting.')
+        exit(0)
+
     # download thread loop
     try:
         if args['--runonce']:
@@ -49,6 +54,11 @@ if __name__ == '__main__':
             first_run = True
             while True:
                 archiver.download_threads()
+
+                if archiver.existing_threads < 1:
+                    print('')
+                    print("All threads have either 404'd or no longer exist, exiting.")
+                    break
 
                 if first_run or not options.silent:
                     print('Waiting {} seconds before retrying (Type Ctrl-C to stop)'.format(args['--delay']))
