@@ -25,10 +25,13 @@ setup(
     author='Antonizoon Overtwater <antonizoon@bibanon.org>, Daniel Oaks <daniel@danieloaks.net>',
     author_email='antonizoon@bibanon.org',
     url='https://github.com/DanielOaks/BASC-thread-archiver',
-    packages=['basc_archiver'],
-    package_dir={'basc_archiver': 'basc_archiver'},
-    install_requires = ['requests', 'docopt==0.5.0', 'py-4chan'],
-    keywords = '4chan downloader images json dump',
+    packages=['basc_archiver', 'basc_archiver.sites'],
+    package_dir={
+        'basc_archiver': 'basc_archiver',
+        'basc_archiver.sites': 'basc_archiver/sites',
+    },
+    install_requires=['requests', 'docopt==0.5.0', 'py-4chan'],
+    keywords='4chan downloader images json dump',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

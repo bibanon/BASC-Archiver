@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Fuuka Archiver Class
+from __future__ import print_function
+from __future__ import absolute_import
+
 from .base import BaseSiteArchiver
 
 

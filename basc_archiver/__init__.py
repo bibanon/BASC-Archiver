@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # BASC Imageboard Archiver
 from __future__ import print_function
+from __future__ import absolute_import
 
 from .sites import default_archivers
 
