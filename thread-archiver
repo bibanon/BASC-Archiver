@@ -11,21 +11,23 @@ thumbnails, thread HTML, JSON if available, and produces a list of
 referenced external links.
 
 Usage:
-  thread-archiver <url>... [--path=<string>] [--runonce] [--silent] [--verbose] [--delay=<int>] [--nothumbs] [--thumbsonly] [--ssl]
+  thread-archiver <url>... [options]
   thread-archiver -h | --help
   thread-archiver -v | --version
 
 Options:
-  --path=<string>     Path to folder where archives will be saved [default: ./archive]
-  --runonce           Downloads the thread as it is presently, then exits
-  --delay=<int>       Delay between thread checks [default: 20]
-  --nothumbs          Don't download thumbnails
-  --thumbsonly        Download thumbnails, no images
-  --ssl               Download using HTTPS
-  --silent            Suppresses mundane printouts, prints what's important
-  --verbose           Printout more information than normal
-  -h --help           Show help
-  -v --version        Show version
+  --path=<string>            Path to folder where archives will be saved [default: ./archive]
+  --runonce                  Downloads the thread as it is presently, then exits
+  --delay=<int>              Delay between thread checks [default: 20]
+  --nothumbs                 Don't download thumbnails
+  --thumbsonly               Download thumbnails, no images
+  --ssl                      Download using HTTPS
+  --follow-children          Follow threads linked in downloaded threads
+  --follow-to-other-boards   Follow linked threads, even if from other boards
+  --silent                   Suppresses mundane printouts, prints what's important
+  --verbose                  Printout more information than normal
+  -h --help                  Show help
+  -v --version               Show version
 """
 
 from docopt import docopt
@@ -37,7 +39,8 @@ if __name__ == '__main__':
     args = docopt(__doc__, version=_version)
 
     options = Options(args['--path'], args['--ssl'], silent=args['--silent'], verbose=args['--verbose'],
-                      skip_thumbs=args['--nothumbs'], thumbs_only=args['--thumbsonly'])
+                      skip_thumbs=args['--nothumbs'], thumbs_only=args['--thumbsonly'],
+                      follow_child_threads=args['--follow-children'], follow_to_other_boards=args['--follow-to-other-boards'])
     archiver = Archiver(options)
 
     # add threads to our archiver

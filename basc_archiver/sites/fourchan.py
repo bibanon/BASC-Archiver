@@ -43,6 +43,7 @@ FOURCHAN_IMAGES_REGEX = r"/\w+/"
 FOURCHAN_THUMBS_REGEX = r"/\w+/"
 FOURCHAN_CSS_REGEX = r"/css/(\w+\.\d+.css)"
 FOURCHAN_JS_REGEX = r"/js/(\w+\.\d+.js)"
+CHILDREGEX = re.compile(r"""href="/([0-9a-zA-Z]+)/(?:res|thread)/([0-9]+)""")
 
 # regex links to 4chan servers
 FOURCHAN_IMAGES_URL_REGEX = re.compile(HTTP_HEADER_UNIV + FOURCHAN_IMAGES + FOURCHAN_IMAGES_REGEX)
@@ -74,10 +75,24 @@ class FourChanSiteArchiver(BaseSiteArchiver):
         """Return true if the given URL is for my site."""
         return THREAD_REGEX.match(url)
 
+    def _url_info(self, url):
+        """INTERNAL: Takes a url, returns board name, thread info."""
+        if self.url_valid(url):
+            return THREAD_REGEX.findall(url)[0]
+        else:
+            return [None, None]
+
     def add_thread(self, url):
         """Add the given thread to our download list."""
-        board_name, thread_id = THREAD_REGEX.findall(url)[0]
+        board_name, thread_id = self._url_info(url)
         thread_id = int(thread_id)
+        return self._add_thread_from_info(board_name, thread_id)
+
+    def _add_thread_from_info(self, board_name, thread_id):
+        """Add a thread to our internal list from direct board name/thread id."""
+        # already exists
+        if thread_id in self.threads:
+            return True
 
         # running board object
         if board_name not in self.boards:
@@ -148,7 +163,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                         if not self.options.silent:
                             print('  Thumbnail:', thumb_name, 'downloaded.')
 
-        # record external urls
+        # record external urls and follow child threads
         external_urls_filename = os.path.join(thread['dir'], EXT_LINKS_FILENAME)
         with open(external_urls_filename, 'w') as external_urls_file:
             # all posts, including topic
@@ -158,11 +173,28 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 if reply.Comment is None:
                     continue
 
-                if not URLREGEX.findall(reply.Comment):
-                    continue
-
                 # 4chan puts <wbr> in middle of urls for word break, remove them
                 cleaned_comment = re.sub(r'\<wbr\>', '', reply.Comment)
+
+                # child threads
+                if self.options.follow_child_threads:
+                    for child_board, child_id in CHILDREGEX.findall(cleaned_comment):
+                        is_same_board = child_board == thread['board']
+                        child_id = int(child_id)
+
+                        if child_id not in self.threads:
+                            if self.options.follow_to_other_boards or not self.options.follow_to_other_boards and is_same_board:
+                                print('  Child thread /{}/{} found and being added/downloaded'.format(child_board, child_id))
+                                self._add_thread_from_info(child_board, child_id)
+                                try:
+                                    self._download_thread(self.threads[child_id])
+                                except:
+                                    # assume recursion got us, skip and do on next download
+                                    print('    There was a problem downloading this thread. Skipping for now.')
+
+                # external urls
+                if not URLREGEX.findall(reply.Comment):
+                    continue
 
                 for found in URLREGEX.findall(cleaned_comment):
                     for url in found:
