@@ -7,7 +7,7 @@ from __future__ import absolute_import
 from .base import BaseSiteArchiver
 from .. import utils
 
-import py4chan
+import basc_py4chan
 
 import os
 import re
@@ -96,10 +96,10 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
         # running board object
         if board_name not in self.boards:
-            self.boards[board_name] = py4chan.Board(board_name, https=self.options.use_ssl)
+            self.boards[board_name] = basc_py4chan.Board(board_name, https=self.options.use_ssl)
         running_board = self.boards[board_name]
 
-        if not running_board.threadExists(thread_id):
+        if not running_board.thread_exists(thread_id):
             print('4chan Thread /{}/{} does not exist.'.format(board_name, thread_id))
             print("Either the thread already 404'ed, your URL is incorrect, or you aren't connected to the internet.")
             return False
@@ -126,7 +126,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 return True
         else:
             running_board = self.boards[thread['board']]
-            self.threads[thread['id']]['thread'] = running_board.getThread(thread['id'])
+            self.threads[thread['id']]['thread'] = running_board.get_thread(thread['id'])
             thread['thread'] = self.threads[thread['id']]['thread']
 
         # download
@@ -142,7 +142,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             image_dir = os.path.join(thread['dir'], _IMAGE_DIR_NAME)
             utils.mkdirs(image_dir)
 
-            for image_url in thread['thread'].Files():
+            for image_url in thread['thread'].files():
                 image_name = re.sub(FOURCHAN_IMAGES_URL_REGEX, '', image_url)
                 local_filename = os.path.join(image_dir, image_name)
                 if not os.path.exists(local_filename):
@@ -155,7 +155,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             thumb_dir = os.path.join(thread['dir'], _THUMB_DIR_NAME)
             utils.mkdirs(thumb_dir)
 
-            for image_url in thread['thread'].Thumbs():
+            for image_url in thread['thread'].thumbs():
                 thumb_name = re.sub(FOURCHAN_THUMBS_URL_REGEX, '', image_url)
                 local_filename = os.path.join(thumb_dir, thumb_name)
                 if not os.path.exists(local_filename):
@@ -170,11 +170,11 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             all_posts = [thread['thread'].topic]
             all_posts.extend(thread['thread'].replies)
             for reply in all_posts:
-                if reply.Comment is None:
+                if reply.comment is None:
                     continue
 
                 # 4chan puts <wbr> in middle of urls for word break, remove them
-                cleaned_comment = re.sub(r'\<wbr\>', '', reply.Comment)
+                cleaned_comment = re.sub(r'\<wbr\>', '', reply.comment)
 
                 # child threads
                 if self.options.follow_child_threads:
@@ -193,7 +193,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                                     print('    There was a problem downloading this thread. Skipping for now.')
 
                 # external urls
-                if not URLREGEX.findall(reply.Comment):
+                if not URLREGEX.findall(reply.comment):
                     continue
 
                 for found in URLREGEX.findall(cleaned_comment):

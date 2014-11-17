@@ -31,7 +31,7 @@ setup(
         'basc_archiver': 'basc_archiver',
         'basc_archiver.sites': 'basc_archiver/sites',
     },
-    install_requires=['requests', 'docopt==0.5.0', 'py-4chan'],
+    install_requires=['requests', 'docopt==0.5.0', 'BASC-py4chan'],
     keywords='4chan downloader images json dump',
     classifiers=[
         'Development Status :: 4 - Beta',
