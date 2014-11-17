@@ -19,7 +19,7 @@ with open('README.rst') as file:
 
 setup(
     name='BASC-Archiver',
-    version='0.8.0',
+    version='0.8.1',
     description='Makes a complete archive of imageboard threads including images, HTML, and JSON.',
     long_description=long_description,
     author='Antonizoon Overtwater <antonizoon@bibanon.org>, Daniel Oaks <daniel@danieloaks.net>',
