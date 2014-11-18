@@ -142,26 +142,26 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             image_dir = os.path.join(thread['dir'], _IMAGE_DIR_NAME)
             utils.mkdirs(image_dir)
 
-            for image_url in thread['thread'].files():
-                image_name = re.sub(FOURCHAN_IMAGES_URL_REGEX, '', image_url)
-                local_filename = os.path.join(image_dir, image_name)
-                if not os.path.exists(local_filename):
-                    if utils.download_file(local_filename, image_url):
+            for filename in thread['thread'].filenames():
+                file_url = http_header + FOURCHAN_IMAGES_URL % (thread['board'], filename)
+                file_path = os.path.join(image_dir, filename)
+                if not os.path.exists(file_path):
+                    if utils.download_file(file_path, file_url):
                         if not self.options.silent:
-                            print('  Image:', image_name, 'downloaded.')
+                            print('  Image:', filename, 'downloaded.')
 
         # thumbs
         if self.options.thumbs_only or not self.options.skip_thumbs:
             thumb_dir = os.path.join(thread['dir'], _THUMB_DIR_NAME)
             utils.mkdirs(thumb_dir)
 
-            for image_url in thread['thread'].thumbs():
-                thumb_name = re.sub(FOURCHAN_THUMBS_URL_REGEX, '', image_url)
-                local_filename = os.path.join(thumb_dir, thumb_name)
-                if not os.path.exists(local_filename):
-                    if utils.download_file(local_filename, image_url):
+            for thumbname in thread['thread'].thumbnames():
+                thumb_url = http_header + FOURCHAN_THUMBS_URL % (thread['board'], thumbname)
+                file_path = os.path.join(thumb_dir, thumbname)
+                if not os.path.exists(file_path):
+                    if utils.download_file(file_path, thumb_url):
                         if not self.options.silent:
-                            print('  Thumbnail:', thumb_name, 'downloaded.')
+                            print('  Thumbnail:', thumbname, 'downloaded.')
 
         # record external urls and follow child threads
         external_urls_filename = os.path.join(thread['dir'], EXT_LINKS_FILENAME)
