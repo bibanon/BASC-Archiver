@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Recompile our QT .ui files to PySide files
+# This must be run whenever the .ui file is changed
+pyside-uic mainwindow.ui > ui_mainwindow.py
