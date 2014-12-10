@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <widget class="QListView" name="threadList"/>
+     <widget class="QTableView" name="threadList"/>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">

@@ -14,6 +14,14 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
+        # setting up thread list
+        model = QtGui.QStandardItemModel(5, 0)
+        model.setHorizontalHeaderLabels(['Site', 'Board', 'Thead ID', 'Slug', 'Status'])
+        self.threadList.setModel(model)
+        self.threadList.verticalHeader().setVisible(False)  # hide row numbers
+        self.threadList.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+
+        # connecting slots
         self.actionAbout.triggered.connect(self.show_about)
         self.actionExit.triggered.connect(QtGui.qApp.quit)
 

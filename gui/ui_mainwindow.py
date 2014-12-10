@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Thu Dec 11 07:42:00 2014
+# Created: Thu Dec 11 08:54:15 2014
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,12 +12,12 @@ from PySide import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(724, 468)
+        MainWindow.resize(763, 468)
         self.centralWidget = QtGui.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.centralWidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.threadList = QtGui.QListView(self.centralWidget)
+        self.threadList = QtGui.QTableView(self.centralWidget)
         self.threadList.setObjectName("threadList")
         self.verticalLayout_2.addWidget(self.threadList)
         self.horizontalLayout = QtGui.QHBoxLayout()
@@ -70,7 +70,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.checkMinutes.sizePolicy().hasHeightForWidth())
         self.checkMinutes.setSizePolicy(sizePolicy)
-        self.checkMinutes.setProperty("value", 1)
+        self.checkMinutes.setProperty("value", 3)
         self.checkMinutes.setObjectName("checkMinutes")
         self.verticalLayout_3.addWidget(self.checkMinutes)
         self.singleDownload = QtGui.QCheckBox(self.centralWidget)
@@ -82,7 +82,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtGui.QMenuBar()
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 724, 22))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 763, 22))
         self.menuBar.setObjectName("menuBar")
         self.menuFile = QtGui.QMenu(self.menuBar)
         self.menuFile.setObjectName("menuFile")
