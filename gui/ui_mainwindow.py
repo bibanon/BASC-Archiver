@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Thu Dec 11 08:54:15 2014
+# Created: Fri Dec 12 20:53:35 2014
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,8 +17,10 @@ class Ui_MainWindow(object):
         self.centralWidget.setObjectName("centralWidget")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.centralWidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.threadList = QtGui.QTableView(self.centralWidget)
+        self.threadList = QtGui.QTableWidget(self.centralWidget)
         self.threadList.setObjectName("threadList")
+        self.threadList.setColumnCount(0)
+        self.threadList.setRowCount(0)
         self.verticalLayout_2.addWidget(self.threadList)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")

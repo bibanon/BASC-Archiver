@@ -3,10 +3,11 @@
 # BASC Imageboard Archiver GUI
 from __future__ import print_function
 from __future__ import absolute_import
+import random
 
 from PySide import QtCore, QtGui
 
-from gui.ui_mainwindow import Ui_MainWindow
+from gui import Ui_MainWindow
 
 
 class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
@@ -14,10 +15,12 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
+        self.saveWarc.setEnabled(False)  # until we support WARC files
+
         # setting up thread list
-        model = QtGui.QStandardItemModel(5, 0)
-        model.setHorizontalHeaderLabels(['Site', 'Board', 'Thead ID', 'Slug', 'Status'])
-        self.threadList.setModel(model)
+        self.threadList.setEditTriggers(QtGui.QAbstractItemView.EditTriggers())  # disable cell editing
+        self.threadList.setColumnCount(5)
+        self.threadList.setHorizontalHeaderLabels(['Site', 'Board', 'Thead ID', 'Slug', 'Status'])
         self.threadList.verticalHeader().setVisible(False)  # hide row numbers
         self.threadList.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
 
@@ -31,10 +34,31 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def show_about(self):
         QtGui.QMessageBox.about(self, 'BASC-Archiver', '<center><h1>BASC-Archiver</h1></center> The <b>BASC Archiver</b> is a Python library used to archive imageboard threads. It uses the 4chan API with the py4chan wrapper. Developers are free to use the BASC-Archiver library for some interesting third-party applications, as it is licensed under the LGPLv3.')
 
+    def _add_thread_list_entry(self, site, board, thread_id, slug):
+        self.threadList.insertRow(0)
+
+        twi = QtGui.QTableWidgetItem(site)
+        self.threadList.setItem(0, 0, twi)
+
+        twi = QtGui.QTableWidgetItem(board)
+        self.threadList.setItem(0, 1, twi)
+
+        twi = QtGui.QTableWidgetItem(str(thread_id))
+        self.threadList.setItem(0, 2, twi)
+
+        twi = QtGui.QTableWidgetItem(slug)
+        self.threadList.setItem(0, 3, twi)
+
+        twi = QtGui.QTableWidgetItem('Waiting {} seconds'.format(random.randint(3, 180)))
+        self.threadList.setItem(0, 4, twi)
+
     def add_thread(self):
         text = self.threadUrl.text()
         single_download = self.singleDownload.isChecked()
         minutes = self.checkMinutes.value()
+
+        self._add_thread_list_entry('4chan', random.choice(['tg', 'gd', 'mu']), random.randint(100000,900000), 'description-of-thread')
+
         if text:
             print('adding thread:', text)
             if single_download:
@@ -47,6 +71,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         print('adding thread from clipboard')
 
 if __name__ == '__main__':
+    random.seed()
     import sys
     app = QtGui.QApplication(sys.argv)
     window = MainWindow()
