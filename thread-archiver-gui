@@ -4,17 +4,71 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import random
+import json
+import sys
+import os
 
-from PySide import QtCore, QtGui
+import appdirs
+from PySide import QtGui
 
-from gui import Ui_MainWindow
+from basc_archiver.gui import Ui_MainWindow
+from basc_archiver import Options, Archiver
+
+
+class GuiOptions(Options):
+    def __init__(self, base_app_dir):
+        # make sure data dir exists
+        if not os.path.exists(base_app_dir):
+            os.makedirs(base_app_dir)
+
+        # open config file if it exists
+        self._path = os.path.join(base_app_dir, 'config.json')
+        self.config = {}
+        self.load()
+
+        # create settings
+        base_dir = self.config.get('base_dir', os.path.join(os.path.expanduser('~'), 'thread-archive'))
+        use_ssl = self.config.get('use_ssl', False)
+        silent = self.config.get('silent', False)
+        verbose = self.config.get('verbose', False)
+        skip_thumbs = self.config.get('skip_thumbs', False)
+        thumbs_only = self.config.get('thumbs_only', False)
+        follow_child_threads = self.config.get('follow_child_threads', False)
+        follow_to_other_boards = self.config.get('follow_to_other_boards', False)
+
+        # create actual options object
+        super(GuiOptions, self).__init__(base_dir, use_ssl=use_ssl,
+                                         silent=silent, verbose=verbose,
+                                         skip_thumbs=skip_thumbs, thumbs_only=thumbs_only,
+                                         follow_child_threads=follow_child_threads,
+                                         follow_to_other_boards=follow_to_other_boards)
+
+    def load(self):
+        try:
+            with open(self._path, 'r') as config_file:
+                config_string = config_file.read()
+                self.config = json.loads(config_string)
+        except FileNotFoundError:
+            self.config = {}
+
+    def save(self):
+        with open(self._path, 'w') as config_file:
+            config_string = json.dumps(self.config)
+            config_file.write(config_string)
+            config_file.write('\n')
 
 
 class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, archiver=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
+        # make sure we have an archiver to attach to
+        if archiver is None:
+            raise Exception('The `archiver` attribute must be set when instantiating MainWindow')
+        self.archiver = archiver
+
+        # set options
         self.saveWarc.setEnabled(False)  # until we support WARC files
 
         # setting up thread list
@@ -72,9 +126,13 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
     random.seed()
-    import sys
+
+    base_options_dir = appdirs.user_data_dir('thread-archiver', 'basc')
+    options = GuiOptions(base_options_dir)
+    archiver = Archiver(options)
+
     app = QtGui.QApplication(sys.argv)
-    window = MainWindow()
+    window = MainWindow(archiver=archiver)
     window.setWindowTitle('BASC-Archiver')
     window.show()
     sys.exit(app.exec_())
