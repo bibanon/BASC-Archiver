@@ -16,8 +16,8 @@ options = {
     },
     'bdist_mac': {
         'bundle_name': 'BASC-Archiver',
-        'iconfile': 'gui/build-files/icon.icns',
-        'custom_info_plist': 'gui/build-files/Info.plist',
+        'iconfile': 'build-files/icon.icns',
+        'custom_info_plist': 'build-files/Info.plist',
     },
     'bdist_dmg': {
         'volume_label': 'BASC-Archiver',
