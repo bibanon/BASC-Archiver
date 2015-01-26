@@ -32,6 +32,7 @@ Options:
 
 from docopt import docopt
 import time
+import sys
 
 from basc_archiver import _version, Options, Archiver
 
@@ -50,7 +51,7 @@ if __name__ == '__main__':
     if archiver.existing_threads < 1:
         print('')
         print('We could not find any of the supplied threads, exiting.')
-        exit(0)
+        sys.exit(0)
 
     # download thread loop
     try:
