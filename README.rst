@@ -1,13 +1,13 @@
 BASC Archiver
 =============
 
-The **BASC Archiver** is a Python library used to archive imageboard
+The **BASC Archiver** is a Python library (packaged with the **thread-archiver** script) used to archive imageboard
 threads. It uses the `4chan API`_ with the py4chan wrapper. Developers
 are free to use the BASC-Archiver library for some interesting
 third-party applications, as it is licensed under the LGPLv3.
 
 It comes with a CLI interface for archiving threads, the
-**thread-archiver**. (A GUI interface, the BASC-Archiver, is under
+**thread-archiver**. (A GUI interface, the BASC-Chandler, is under
 development.)
 
 The **thread-archiver** is designed to archive all content from a 4chan
