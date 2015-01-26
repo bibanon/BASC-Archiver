@@ -11,6 +11,7 @@ import basc_py4chan
 
 import os
 import re
+import time
 
 # finding board name/thread id
 THREAD_REGEX = re.compile(r"""https?://(?:boards\.)?4chan\.org/([0-9a-zA-Z]+)/(?:res|thread)/([0-9]+)""")
@@ -145,7 +146,10 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             for filename in thread['thread'].filenames():
                 file_url = http_header + FOURCHAN_IMAGES_URL % (thread['board'], filename)
                 file_path = os.path.join(image_dir, filename)
+                
                 if not os.path.exists(file_path):
+                    # delay the download to reduce stress on server
+                    time.sleep(float(self.options.delay))
                     if utils.download_file(file_path, file_url):
                         if not self.options.silent:
                             print('  Image:', filename, 'downloaded.')
@@ -158,7 +162,10 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             for thumbname in thread['thread'].thumbnames():
                 thumb_url = http_header + FOURCHAN_THUMBS_URL % (thread['board'], thumbname)
                 file_path = os.path.join(thumb_dir, thumbname)
+                
                 if not os.path.exists(file_path):
+                    # delay the download to reduce stress on server
+                    time.sleep(float(self.options.delay))
                     if utils.download_file(file_path, thumb_url):
                         if not self.options.silent:
                             print('  Thumbnail:', thumbname, 'downloaded.')

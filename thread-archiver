@@ -18,7 +18,8 @@ Usage:
 Options:
   --path=<string>            Path to folder where archives will be saved [default: ./archive]
   --runonce                  Downloads the thread as it is presently, then exits
-  --delay=<int>              Delay between thread checks [default: 20]
+  --delay=<float>            Delay between file downloads [default: 0]
+  --poll-delay=<float>       Delay between thread checks [default: 20]
   --nothumbs                 Don't download thumbnails
   --thumbsonly               Download thumbnails, no images
   --ssl                      Download using HTTPS
@@ -40,6 +41,7 @@ if __name__ == '__main__':
     args = docopt(__doc__, version=_version)
 
     options = Options(args['--path'], args['--ssl'], silent=args['--silent'], verbose=args['--verbose'],
+                      delay=args['--delay'],
                       skip_thumbs=args['--nothumbs'], thumbs_only=args['--thumbsonly'],
                       follow_child_threads=args['--follow-children'], follow_to_other_boards=args['--follow-to-other-boards'])
     archiver = Archiver(options)
@@ -68,8 +70,8 @@ if __name__ == '__main__':
                     break
 
                 if first_run or not options.silent:
-                    print('Waiting {} seconds before retrying (Type Ctrl-C to stop)'.format(args['--delay']))
-                time.sleep(int(args['--delay']))
+                    print('Waiting {} seconds before retrying (Type Ctrl-C to stop)'.format(args['--poll-delay']))
+                time.sleep(float(args['--poll-delay']))
 
                 if first_run:
                     first_run = False

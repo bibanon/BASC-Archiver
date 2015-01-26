@@ -15,6 +15,7 @@ The **thread-archiver** is designed to archive all content from a 4chan
 thread:
 
 -   Download all images and/or thumbnails in given threads.
+-   (NEW!) Download all child threads (4chan threads referred to in a post)
 -   Download a JSON dump of thread comments using the 4chan API.
 -   Download the HTML page
 -   Convert links in HTML to use the downloaded images
@@ -30,22 +31,25 @@ Usage
 =====
 
 ```
-  Usage:
-    thread-archiver <url>... [--path=<string>] [--runonce] [--silent] [--verbose] [--delay=<int>] [--nothumbs] [--thumbsonly] [--ssl]
-    thread-archiver -h | --help
-    thread-archiver -v | --version
+Usage:
+  thread-archiver <url>... [options]
+  thread-archiver -h | --help
+  thread-archiver -v | --version
 
-  Options:
-    --path=<string>     Path to folder where archives will be saved [default: ./archive]
-    --runonce           Downloads the thread as it is presently, then exits
-    --delay=<int>       Delay between thread checks [default: 20]
-    --nothumbs          Don't download thumbnails
-    --thumbsonly        Download thumbnails, no images
-    --ssl               Download using HTTPS
-    --silent            Suppresses mundane printouts, prints what's important
-    --verbose           Printout more information than normal
-    -h --help           Show help
-    -v --version        Show version
+Options:
+  --path=<string>            Path to folder where archives will be saved [default: ./archive]
+  --runonce                  Downloads the thread as it is presently, then exits
+  --delay=<float>            Delay between file downloads [default: 0]
+  --poll-delay=<float>       Delay between thread checks [default: 20]
+  --nothumbs                 Don't download thumbnails
+  --thumbsonly               Download thumbnails, no images
+  --ssl                      Download using HTTPS
+  --follow-children          Follow threads linked in downloaded threads
+  --follow-to-other-boards   Follow linked threads, even if from other boards
+  --silent                   Suppresses mundane printouts, prints what's important
+  --verbose                  Printout more information than normal
+  -h --help                  Show help
+  -v --version               Show version
 ```
     
 Example
