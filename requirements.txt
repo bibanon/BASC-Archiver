@@ -1,0 +1,4 @@
+cx-freeze
+docopt
+requests
+basc_py4chan
