@@ -7,7 +7,7 @@ from __future__ import absolute_import
 import os
 import re
 import json
-import fileinput
+import codecs
 
 import requests
 
@@ -53,8 +53,14 @@ def download_json(local_filename, url, clobber=False):
 
 def file_replace(local_filename, pattern, replacement):
     """Regex replace in the given file."""
-    for line in fileinput.input(local_filename, inplace=True):
-        print(re.sub(pattern, replacement, line))
+    # can't use fileinput lib here because utf-8
+    temp_new_filename = '{}-temporary'.format(local_filename)
+    with codecs.open(local_filename, 'r', encoding='utf-8') as fi:
+        with codecs.open(temp_new_filename, 'w', encoding='utf-8') as fo:
+            for line in fi:
+                fo.write(re.sub(pattern, replacement, line))
+    os.remove(local_filename)
+    os.rename(temp_new_filename, local_filename)
 
 
 def timestamp():
