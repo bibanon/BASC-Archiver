@@ -12,6 +12,7 @@ import basc_py4chan
 import os
 import re
 import time
+import codecs
 
 # finding board name/thread id
 THREAD_REGEX = re.compile(r"""https?://(?:boards\.)?4chan\.org/([0-9a-zA-Z]+)/(?:res|thread)/([0-9]+)""")
@@ -172,7 +173,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
         # record external urls and follow child threads
         external_urls_filename = os.path.join(thread['dir'], EXT_LINKS_FILENAME)
-        with open(external_urls_filename, 'w') as external_urls_file:
+        with codecs.open(external_urls_filename, 'w', encoding='utf-8') as external_urls_file:
             # all posts, including topic
             all_posts = [thread['thread'].topic]
             all_posts.extend(thread['thread'].replies)
@@ -226,7 +227,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             utils.mkdirs(css_dir)
 
             css_regex = re.compile(FOURCHAN_CSS_REGEX)
-            found_css_files = css_regex.findall(open(local_filename).read())
+            found_css_files = css_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
             for css_filename in found_css_files:
                 local_css_filename = os.path.join(css_dir, css_filename)
                 url = http_header + FOURCHAN_STATIC + '/css/' + css_filename
@@ -237,7 +238,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             utils.mkdirs(js_dir)
 
             js_regex = re.compile(FOURCHAN_JS_REGEX)
-            found_js_files = js_regex.findall(open(local_filename).read())
+            found_js_files = js_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
             for js_filename in found_js_files:
                 local_js_filename = os.path.join(js_dir, js_filename)
                 url = http_header + FOURCHAN_STATIC + '/js/' + js_filename
