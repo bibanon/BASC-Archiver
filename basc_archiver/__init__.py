@@ -6,7 +6,7 @@ from __future__ import absolute_import
 
 from .sites import default_archivers
 
-version = '0.8.4'
+version = '0.8.5'
 _default_base_dir = './archive'
 
 
