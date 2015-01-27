@@ -35,10 +35,10 @@ from docopt import docopt
 import time
 import sys
 
-from basc_archiver import _version, Options, Archiver
+from basc_archiver import version, Options, Archiver
 
 if __name__ == '__main__':
-    args = docopt(__doc__, version=_version)
+    args = docopt(__doc__, version=version)
 
     options = Options(args['--path'], args['--ssl'], silent=args['--silent'], verbose=args['--verbose'],
                       delay=args['--delay'],
