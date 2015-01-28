@@ -4,7 +4,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-from .base import BaseSiteArchiver
+from .base import BaseSiteArchiver, DownloadItem
 from .. import utils
 
 import basc_py4chan
@@ -13,6 +13,7 @@ import os
 import re
 import time
 import codecs
+import threading
 
 # finding board name/thread id
 THREAD_REGEX = re.compile(r"""https?://(?:boards\.)?4chan\.org/([0-9a-zA-Z]+)/(?:res|thread)/([0-9]+)""")
@@ -71,6 +72,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
     def __init__(self, options):
         BaseSiteArchiver.__init__(self, options)
 
+        self.boards_lock = threading.Lock()
         self.boards = {}
 
     def url_valid(self, url):
@@ -97,14 +99,15 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             return True
 
         # running board object
-        if board_name not in self.boards:
-            self.boards[board_name] = basc_py4chan.Board(board_name, https=self.options.use_ssl)
-        running_board = self.boards[board_name]
+        with self.boards_lock:
+            if board_name not in self.boards:
+                self.boards[board_name] = basc_py4chan.Board(board_name, https=self.options.use_ssl)
+            running_board = self.boards[board_name]
 
-        if not running_board.thread_exists(thread_id):
-            print('4chan Thread /{}/{} does not exist.'.format(board_name, thread_id))
-            print("Either the thread already 404'ed, your URL is incorrect, or you aren't connected to the internet.")
-            return False
+            if not running_board.thread_exists(thread_id):
+                print('4chan Thread /{}/{} does not exist.'.format(board_name, thread_id))
+                print("Either the thread already 404'ed, your URL is incorrect, or you aren't connected to the internet.")
+                return False
 
         # add thread to download list
         self.threads[thread_id] = {
@@ -112,6 +115,13 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             'dir': self.base_thread_dir.format(board=board_name, thread=thread_id),
             'id': thread_id,
         }
+
+        self.add_to_dl('thread', id=thread_id)
+
+    def download_item(self, item):
+        """Download the given item."""
+        print('downloading:', item.dl_type, item.info['id'])
+
 
     def _download_thread(self, thread):
         """Download the given thread, from the thread info."""

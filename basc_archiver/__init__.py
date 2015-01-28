@@ -14,15 +14,16 @@ class Options:
     """Holds Archiver options."""
     def __init__(self, base_dir, use_ssl=False,
                  silent=False, verbose=False, delay=2,
-                 skip_thumbs=False, thumbs_only=False,
+                 skip_thumbs=False, thumbs_only=False, run_once=False,
                  follow_child_threads=False, follow_to_other_boards=False):
         self.base_dir = base_dir
         self.use_ssl = use_ssl
         self.silent = silent
         self.verbose = verbose
-        self.delay = delay          # wait 2 seconds by default
+        self.delay = delay  # wait 2 seconds by default
         self.skip_thumbs = skip_thumbs
         self.thumbs_only = thumbs_only
+        self.run_once = run_once
         self.follow_child_threads = follow_child_threads
         self.follow_to_other_boards = follow_to_other_boards
 
