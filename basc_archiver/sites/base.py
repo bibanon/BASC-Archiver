@@ -5,6 +5,41 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
+import time
+import threading
+
+DEFAULT_DL_WAIT_SECONDS = 1
+DEFAULT_DL_THREADS = 5
+
+
+class DownloadThread(threading.Thread):
+    def __init__(self, site, wait_seconds=1):
+        threading.Thread.__init__(self)
+        self.site = site
+        self.wait_seconds = wait_seconds
+        self.daemon = True
+        self.start()
+
+    def run(self):
+        while True:
+            # check if shutdown
+            if self.site.is_shutdown:
+                break
+
+            # get next item to dl
+            next_item = None
+            with self.site.to_dl_lock:
+                if len(self.site.to_dl):
+                    next_item = self.site.to_dl.pop(0)
+
+            # download
+            if next_item is not None:
+                print('Downloading item', next_item)
+            else:
+                print('DL found nothing')
+
+            # wait
+            time.sleep(self.wait_seconds)
 
 
 class BaseSiteArchiver(object):
@@ -16,6 +51,20 @@ class BaseSiteArchiver(object):
         self.options = options
         self.base_thread_dir = os.path.join(options.base_dir, '{}/{{board}}/{{thread}}/'.format(self.name))
 
+        # setup thread info
+        self.is_shutdown = False
+        self.to_dl_lock = threading.Lock()
+        self.to_dl = []
+
+        # start download threads
+        for i in range(getattr(self, 'dl_threads', DEFAULT_DL_THREADS)):
+            DownloadThread(self, getattr(self, 'dl_wait_seconds', DEFAULT_DL_WAIT_SECONDS))
+
+    def shutdown(self):
+        """Shutdown this archiver."""
+        self.is_shutdown = True
+
+    # adding threads
     def url_valid(self, url):
         """Return true if the given URL is for my site."""
         raise Exception('you must override this method')
@@ -24,18 +73,7 @@ class BaseSiteArchiver(object):
         """Try to add the given thread to our internal list."""
         raise Exception('you must override this method')
 
-    def download_threads(self):
-        """Download all the threads we currently hold."""
-        # we iterate over a copy of self.threads because download_thread
-        # deletes it from there if thread 404's
-        for thread_id in dict(self.threads):
-            self._download_thread(self.threads[thread_id])
-
     @property
     def existing_threads(self):
         """Return how many threads we have and are downloading."""
         return len(self.threads)
-
-    def _download_thread(self, thread_info):
-        """Download the given thread, from the thread info."""
-        raise Exception('you must override this method')
