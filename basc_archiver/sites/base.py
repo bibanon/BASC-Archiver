@@ -12,6 +12,12 @@ DEFAULT_DL_WAIT_SECONDS = 1
 DEFAULT_DL_THREADS = 5
 
 
+class DownloadItem(object):
+    def __init__(self, dl_type, info):
+        self.dl_type = dl_type
+        self.info = info
+
+
 class DownloadThread(threading.Thread):
     def __init__(self, site, wait_seconds=1):
         threading.Thread.__init__(self)
@@ -35,6 +41,7 @@ class DownloadThread(threading.Thread):
             # download
             if next_item is not None:
                 print('Downloading item', next_item)
+                self.site.download_item(next_item)
             else:
                 print('DL found nothing')
 
@@ -64,6 +71,12 @@ class BaseSiteArchiver(object):
         """Shutdown this archiver."""
         self.is_shutdown = True
 
+    def add_to_dl(self, dl_type, **kwargs):
+        """Add an item to our download list."""
+        new_item = DownloadItem(dl_type, kwargs)
+        with self.to_dl_lock:
+            self.to_dl.append(new_item)
+
     # adding threads
     def url_valid(self, url):
         """Return true if the given URL is for my site."""
@@ -77,3 +90,8 @@ class BaseSiteArchiver(object):
     def existing_threads(self):
         """Return how many threads we have and are downloading."""
         return len(self.threads)
+
+    # downloading specific items
+    def download_item(self, item):
+        """Download the given item"""
+        raise Exception('you must override this method')
