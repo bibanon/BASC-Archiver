@@ -52,11 +52,6 @@ class Archiver:
         else:
             print('We could not find a valid archiver for:', url)
             return False
-    
-    def download_threads(self):
-        """Download all the threads we currently hold."""
-        for archiver in self.archivers:
-            archiver.download_threads()
 
     @property
     def existing_threads(self):
@@ -65,3 +60,8 @@ class Archiver:
         for archiver in self.archivers:
             threads += archiver.existing_threads
         return threads
+
+    def shutdown(self):
+        """Shutdown the archiver."""
+        for archiver in self.archivers:
+            archiver.shutdown()

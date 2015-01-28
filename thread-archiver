@@ -41,7 +41,7 @@ if __name__ == '__main__':
     args = docopt(__doc__, version=version)
 
     options = Options(args['--path'], args['--ssl'], silent=args['--silent'], verbose=args['--verbose'],
-                      delay=args['--delay'],
+                      delay=args['--delay'], run_once=args['--runonce']
                       skip_thumbs=args['--nothumbs'], thumbs_only=args['--thumbsonly'],
                       follow_child_threads=args['--follow-children'], follow_to_other_boards=args['--follow-to-other-boards'])
     archiver = Archiver(options)
@@ -57,24 +57,21 @@ if __name__ == '__main__':
 
     # download thread loop
     try:
-        if args['--runonce']:
+        first_run = True
+        while True:
             archiver.download_threads()
-        else:
-            first_run = True
-            while True:
-                archiver.download_threads()
 
-                if archiver.existing_threads < 1:
-                    print('')
-                    print("All threads have either 404'd or no longer exist, exiting.")
-                    break
+            if archiver.existing_threads < 1:
+                print('')
+                print("All threads have either 404'd or no longer exist, exiting.")
+                break
 
-                if first_run or not options.silent:
-                    print('Waiting {} seconds before retrying (Type Ctrl-C to stop)'.format(args['--poll-delay']))
-                time.sleep(float(args['--poll-delay']))
+            if first_run or not options.silent:
+                print('Waiting {} seconds before retrying (Type Ctrl-C to stop)'.format(args['--poll-delay']))
+            time.sleep(float(args['--poll-delay']))
 
-                if first_run:
-                    first_run = False
+            if first_run:
+                first_run = False
     except KeyboardInterrupt:
         print('')
         print('Dump complete. To resume dumping, run this script again.')
