@@ -4,6 +4,8 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
+import threading
+
 from .sites import default_archivers
 
 version = '0.8.5'
@@ -35,12 +37,22 @@ class Archiver:
         if options is None:
             options = Options(_default_base_dir)
         self.options = options
+        self.callbacks_lock = threading.Lock()
+        self.callbacks = {
+            'all': []
+        }  # info callbacks
 
         # add our default site-specific archivers
         self.archivers = []
         for archiver in default_archivers:
             self.archivers.append(archiver(self.options))
+
+    def shutdown(self):
+        """Shutdown the archiver."""
+        for archiver in self.archivers:
+            archiver.shutdown()
         
+    # threads
     def add_thread(self, url):
         """Archive the given thread if possible"""
         url_archived = False
@@ -63,7 +75,34 @@ class Archiver:
             threads += archiver.existing_threads
         return threads
 
-    def shutdown(self):
-        """Shutdown the archiver."""
-        for archiver in self.archivers:
-            archiver.shutdown()
+    # callbacks
+    def register_callback(self, cb_type, handler):
+        """Register a callback."""
+        with self.callbacks_lock:
+            if cb_type not in self.callbacks:
+                self.callbacks[cb_type] = []
+
+            if handler not in self.callbacks[cb_type]:
+                self.callbacks[cb_type].append(handler)
+
+    def unregister_callback(self, cb_type, handler):
+        """Remove a callback."""
+        with self.callbacks_lock:
+            if cb_type in self.callbacks and handler in self.callbacks[cb_type]:
+                self.callbacks[db_type].remove(handler)
+
+    def update_status(self, cb_type, info):
+        """Update thread status, call callbacks where appropriate."""
+        with self.callbacks_lock:
+            # to stop us calling same handler twice
+            called = []
+
+            if cb_type in self.callbacks:
+                for handler in self.callbacks[cb_type]:
+                    handler(cb_type, info)
+                    called.append(handler)
+
+            for handler in self.callbacks['all']:
+                if handler not in called:
+                    handler(cb_type, info)
+
