@@ -69,8 +69,8 @@ URLREGEX = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-
 
 class FourChanSiteArchiver(BaseSiteArchiver):
     name = '4chan'
-    def __init__(self, options):
-        BaseSiteArchiver.__init__(self, options)
+    def __init__(self, callback_handler, options):
+        BaseSiteArchiver.__init__(self, callback_handler, options)
 
         self.boards_lock = threading.Lock()
         self.boards = {}
@@ -95,8 +95,9 @@ class FourChanSiteArchiver(BaseSiteArchiver):
     def _add_thread_from_info(self, board_name, thread_id):
         """Add a thread to our internal list from direct board name/thread id."""
         # already exists
-        if thread_id in self.threads:
-            return True
+        with self.threads_lock:
+            if thread_id in self.threads:
+                return True
 
         # running board object
         with self.boards_lock:
@@ -110,11 +111,15 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 return False
 
         # add thread to download list
-        self.threads[thread_id] = {
-            'board': board_name,
-            'dir': self.base_thread_dir.format(board=board_name, thread=thread_id),
-            'thread_id': thread_id,
-        }
+        with self.threads_lock:
+            self.threads[thread_id] = {
+                'board': board_name,
+                'dir': self.base_thread_dir.format(board=board_name, thread=thread_id),
+                'thread_id': thread_id,
+                'total_files': 0,
+                'images_downloaded': 0,
+                'thumbs_downloaded': 0,
+            }
 
         self.add_to_dl('thread', board=board_name, thread_id=thread_id)
 
@@ -138,6 +143,8 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             if not os.path.exists(file_path):
                 utils.mkdirs(images_dir)
                 if utils.download_file(file_path, file_url):
+                    with self.threads_lock:
+                        self.threads[thread_id]['images_downloaded'] += 1
                     if not self.options.silent:
                         print('  Image {} / {} / {} downloaded'.format(board_name, thread_id, filename))
 
@@ -157,6 +164,8 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             if not os.path.exists(file_path):
                 utils.mkdirs(thumbs_dir)
                 if utils.download_file(file_path, file_url):
+                    with self.threads_lock:
+                        self.threads[thread_id]['thumbs_downloaded'] += 1
                     if not self.options.silent:
                         print('  Thumbnail {} / {} / {} downloaded'.format(board_name, thread_id, filename))
 
@@ -181,12 +190,17 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                         print("Thread {} / {} 404'd.".format(board_name, thread_id))
                         del self.threads[thread_id]
                         return True
+                    else:
+                        with self.threads_lock:
+                            self.threads[thread_id]['total_files'] = len(running_thread.filenames())
                 else:
                     running_board = self.boards[board_name]
                     running_thread = running_board.get_thread(thread_id)
                     self.threads[thread_id]['thread'] = running_thread
                     thread['thread'] = running_thread
                     new_replies = len(running_thread.all_posts)
+                    with self.threads_lock:
+                        self.threads[thread_id]['total_files'] = len(running_thread.filenames())
 
             # thread
             if not self.options.silent:

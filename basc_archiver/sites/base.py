@@ -68,19 +68,23 @@ class DownloadThread(threading.Thread):
 
 class BaseSiteArchiver(object):
     name = 'base'
-    def __init__(self, options):
+    def __init__(self, handler_callback, options):
         if self.name == 'base':
             raise Exception('BaseSiteArchiver must be subclassed!')
-        self.threads = {}
         self.options = options
         self.base_thread_dir = os.path.join(options.base_dir, '{}/{{board}}/{{thread}}/'.format(self.name))
         self.base_images_dir = os.path.join(self.base_thread_dir, 'images')
         self.base_thumbs_dir = os.path.join(self.base_thread_dir, 'thumbs')
 
+        self.threads_lock = threading.Lock()
+        self.threads = {}
+
         # setup thread info
         self.is_shutdown = False
         self.to_dl_lock = threading.Lock()
         self.to_dl = []
+
+        self._handler_callback = handler_callback
 
         # start download threads
         for i in range(getattr(self, 'dl_threads', DEFAULT_DL_THREADS)):
@@ -90,6 +94,13 @@ class BaseSiteArchiver(object):
         """Shutdown this archiver."""
         self.is_shutdown = True
 
+    def update_status(self, cb_type, info):
+        """Update thread status, call callbacks where appropriate."""
+        # mostly convenience function
+        info['site'] = self.name
+        self._handler_callback(cb_type, info)
+
+    # download
     def add_to_dl(self, dl_type=None, item=None, **kwargs):
         """Add an item to our download list."""
         if item is not None:
