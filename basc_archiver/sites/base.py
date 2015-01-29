@@ -16,13 +16,23 @@ class DownloadItem(object):
     def __init__(self, dl_type, info):
         self.dl_type = dl_type
         self.info = info
+        self._dl_timestamp = 0
+
+    def can_dl(self):
+        """True if you can download this item."""
+        return time.time() >= self._dl_timestamp
+
+    def delay_dl_timestamp(self, delay_in_seconds=90):
+        """Delay the download of this item for 90 seconds."""
+        self._dl_timestamp = time.time() + delay_in_seconds
 
 
 class DownloadThread(threading.Thread):
-    def __init__(self, site, wait_seconds=1):
+    def __init__(self, site, wait_seconds=1, success_wait_seconds=0.1):
         threading.Thread.__init__(self)
         self.site = site
         self.wait_seconds = wait_seconds
+        self.success_wait_seconds = success_wait_seconds
         self.daemon = True
         self.start()
 
@@ -35,18 +45,25 @@ class DownloadThread(threading.Thread):
             # get next item to dl
             next_item = None
             with self.site.to_dl_lock:
-                if len(self.site.to_dl):
-                    next_item = self.site.to_dl.pop(0)
+                # make sure dl timestamp on selected item has passed
+                for i in range(len(self.site.to_dl)):
+                    next_item = self.site.to_dl[i]
+
+                    if next_item.can_dl():
+                        self.site.to_dl.pop(i)
+                        break
+                    else:
+                        next_item = None
 
             # download
             if next_item is not None:
-                print('Downloading item', next_item)
                 self.site.download_item(next_item)
-            else:
-                print('DL found nothing')
 
             # wait
-            time.sleep(self.wait_seconds)
+            if next_item is None:
+                time.sleep(self.wait_seconds)
+            else:
+                time.sleep(self.success_wait_seconds)
 
 
 class BaseSiteArchiver(object):
@@ -57,6 +74,8 @@ class BaseSiteArchiver(object):
         self.threads = {}
         self.options = options
         self.base_thread_dir = os.path.join(options.base_dir, '{}/{{board}}/{{thread}}/'.format(self.name))
+        self.base_images_dir = os.path.join(self.base_thread_dir, 'images')
+        self.base_thumbs_dir = os.path.join(self.base_thread_dir, 'thumbs')
 
         # setup thread info
         self.is_shutdown = False
@@ -71,9 +90,13 @@ class BaseSiteArchiver(object):
         """Shutdown this archiver."""
         self.is_shutdown = True
 
-    def add_to_dl(self, dl_type, **kwargs):
+    def add_to_dl(self, dl_type=None, item=None, **kwargs):
         """Add an item to our download list."""
-        new_item = DownloadItem(dl_type, kwargs)
+        if item is not None:
+            new_item = item
+        else:
+            new_item = DownloadItem(dl_type, kwargs)
+
         with self.to_dl_lock:
             self.to_dl.append(new_item)
 

@@ -13,7 +13,7 @@ _default_base_dir = './archive'
 class Options:
     """Holds Archiver options."""
     def __init__(self, base_dir, use_ssl=False,
-                 silent=False, verbose=False, delay=2,
+                 silent=False, verbose=False, delay=2, thread_check_delay=90,
                  skip_thumbs=False, thumbs_only=False, run_once=False,
                  follow_child_threads=False, follow_to_other_boards=False):
         self.base_dir = base_dir
@@ -21,6 +21,7 @@ class Options:
         self.silent = silent
         self.verbose = verbose
         self.delay = delay  # wait 2 seconds by default
+        self.thread_check_delay = thread_check_delay  # between checks of the same thread
         self.skip_thumbs = skip_thumbs
         self.thumbs_only = thumbs_only
         self.run_once = run_once
