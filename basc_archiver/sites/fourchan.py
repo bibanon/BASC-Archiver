@@ -106,7 +106,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             running_board = self.boards[board_name]
 
             if not running_board.thread_exists(thread_id):
-                print('4chan Thread /{}/{} does not exist.'.format(board_name, thread_id))
+                print('4chan Thread {} / {} does not exist.'.format(board_name, thread_id))
                 print("Either the thread already 404'ed, your URL is incorrect, or you aren't connected to the internet.")
                 return False
 
@@ -120,6 +120,8 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 'images_downloaded': 0,
                 'thumbs_downloaded': 0,
             }
+            status_info = self.threads[thread_id]
+        self.update_status('new_thread', info=status_info)
 
         self.add_to_dl('thread', board=board_name, thread_id=thread_id)
 
@@ -145,6 +147,9 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 if utils.download_file(file_path, file_url):
                     with self.threads_lock:
                         self.threads[thread_id]['images_downloaded'] += 1
+                        status_info = self.threads[thread_id]
+                        status_info['filename'] = filename
+                    self.update_status('image_dl', info=status_info)
                     if not self.options.silent:
                         print('  Image {} / {} / {} downloaded'.format(board_name, thread_id, filename))
 
@@ -166,6 +171,9 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 if utils.download_file(file_path, file_url):
                     with self.threads_lock:
                         self.threads[thread_id]['thumbs_downloaded'] += 1
+                        status_info = self.threads[thread_id]
+                        status_info['filename'] = filename
+                    self.update_status('thumb_dl', info=status_info)
                     if not self.options.silent:
                         print('  Thumbnail {} / {} / {} downloaded'.format(board_name, thread_id, filename))
 
@@ -188,11 +196,15 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                     elif thread['thread'].is_404:
                         # thread 404'd
                         print("Thread {} / {} 404'd.".format(board_name, thread_id))
+                        with self.threads_lock:
+                            status_info = self.threads[thread_id]
+                        self.update_status('404', info=status_info)
                         del self.threads[thread_id]
                         return True
                     else:
                         with self.threads_lock:
-                            self.threads[thread_id]['total_files'] = len(running_thread.filenames())
+                            # TODO: extend BASC-py4chan to give us this number directly
+                            self.threads[thread_id]['total_files'] = len(list(running_thread.filenames()))
                 else:
                     running_board = self.boards[board_name]
                     running_thread = running_board.get_thread(thread_id)
@@ -200,7 +212,8 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                     thread['thread'] = running_thread
                     new_replies = len(running_thread.all_posts)
                     with self.threads_lock:
-                        self.threads[thread_id]['total_files'] = len(running_thread.filenames())
+                        # TODO: extend BASC-py4chan to give us this number directly
+                        self.threads[thread_id]['total_files'] = len(list(running_thread.filenames()))
 
             # thread
             if not self.options.silent:
@@ -290,3 +303,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             # queue for next dl
             item.delay_dl_timestamp(self.options.thread_check_delay)
             self.add_to_dl(item=item)
+
+            with self.threads_lock:
+                status_info = self.threads[thread_id]
+            self.update_status('thread_dl', info=status_info)
