@@ -14,8 +14,11 @@ import requests
 
 def mkdirs(path):
     """Make directory, if it doesn't exist."""
-    if not os.path.exists(path):
-        os.makedirs(path)
+    try:
+        if not os.path.exists(path):
+            os.makedirs(path)
+    except OSError:  # folder exists, due to multithreading
+        pass
 
 
 def download_file(local_filename, url, clobber=False):

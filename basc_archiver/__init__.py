@@ -4,6 +4,8 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
+import threading
+
 from .sites import default_archivers
 
 version = '0.8.5'
@@ -13,16 +15,18 @@ _default_base_dir = './archive'
 class Options:
     """Holds Archiver options."""
     def __init__(self, base_dir, use_ssl=False,
-                 silent=False, verbose=False, delay=2,
-                 skip_thumbs=False, thumbs_only=False,
+                 silent=False, verbose=False, delay=2, thread_check_delay=90,
+                 skip_thumbs=False, thumbs_only=False, run_once=False,
                  follow_child_threads=False, follow_to_other_boards=False):
         self.base_dir = base_dir
         self.use_ssl = use_ssl
         self.silent = silent
         self.verbose = verbose
-        self.delay = delay          # wait 2 seconds by default
+        self.delay = float(delay)  # wait 2 seconds by default
+        self.thread_check_delay = float(thread_check_delay)  # between checks of the same thread
         self.skip_thumbs = skip_thumbs
         self.thumbs_only = thumbs_only
+        self.run_once = run_once
         self.follow_child_threads = follow_child_threads
         self.follow_to_other_boards = follow_to_other_boards
 
@@ -33,12 +37,22 @@ class Archiver:
         if options is None:
             options = Options(_default_base_dir)
         self.options = options
+        self.callbacks_lock = threading.Lock()
+        self.callbacks = {
+            'all': []
+        }  # info callbacks
 
         # add our default site-specific archivers
         self.archivers = []
         for archiver in default_archivers:
-            self.archivers.append(archiver(self.options))
+            self.archivers.append(archiver(self.update_status, self.options))
+
+    def shutdown(self):
+        """Shutdown the archiver."""
+        for archiver in self.archivers:
+            archiver.shutdown()
         
+    # threads
     def add_thread(self, url):
         """Archive the given thread if possible"""
         url_archived = False
@@ -52,11 +66,6 @@ class Archiver:
         else:
             print('We could not find a valid archiver for:', url)
             return False
-    
-    def download_threads(self):
-        """Download all the threads we currently hold."""
-        for archiver in self.archivers:
-            archiver.download_threads()
 
     @property
     def existing_threads(self):
@@ -65,3 +74,35 @@ class Archiver:
         for archiver in self.archivers:
             threads += archiver.existing_threads
         return threads
+
+    # callbacks
+    def register_callback(self, cb_type, handler):
+        """Register a callback."""
+        with self.callbacks_lock:
+            if cb_type not in self.callbacks:
+                self.callbacks[cb_type] = []
+
+            if handler not in self.callbacks[cb_type]:
+                self.callbacks[cb_type].append(handler)
+
+    def unregister_callback(self, cb_type, handler):
+        """Remove a callback."""
+        with self.callbacks_lock:
+            if cb_type in self.callbacks and handler in self.callbacks[cb_type]:
+                self.callbacks[db_type].remove(handler)
+
+    def update_status(self, cb_type, info):
+        """Update thread status, call callbacks where appropriate."""
+        with self.callbacks_lock:
+            # to stop us calling same handler twice
+            called = []
+
+            if cb_type in self.callbacks:
+                for handler in self.callbacks[cb_type]:
+                    handler(cb_type, info)
+                    called.append(handler)
+
+            for handler in self.callbacks['all']:
+                if handler not in called:
+                    handler(cb_type, info)
+
