@@ -22,8 +22,8 @@ class Options:
         self.use_ssl = use_ssl
         self.silent = silent
         self.verbose = verbose
-        self.delay = delay  # wait 2 seconds by default
-        self.thread_check_delay = thread_check_delay  # between checks of the same thread
+        self.delay = float(delay)  # wait 2 seconds by default
+        self.thread_check_delay = float(thread_check_delay)  # between checks of the same thread
         self.skip_thumbs = skip_thumbs
         self.thumbs_only = thumbs_only
         self.run_once = run_once
@@ -45,7 +45,7 @@ class Archiver:
         # add our default site-specific archivers
         self.archivers = []
         for archiver in default_archivers:
-            self.archivers.append(archiver(self.options))
+            self.archivers.append(archiver(self.update_status, self.options))
 
     def shutdown(self):
         """Shutdown the archiver."""
