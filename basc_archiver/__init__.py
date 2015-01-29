@@ -6,20 +6,21 @@ from __future__ import absolute_import
 
 from .sites import default_archivers
 
-_version = 0.4
+version = '0.8.5'
 _default_base_dir = './archive'
 
 
 class Options:
     """Holds Archiver options."""
     def __init__(self, base_dir, use_ssl=False,
-                 silent=False, verbose=False,
+                 silent=False, verbose=False, delay=2,
                  skip_thumbs=False, thumbs_only=False,
                  follow_child_threads=False, follow_to_other_boards=False):
         self.base_dir = base_dir
         self.use_ssl = use_ssl
         self.silent = silent
         self.verbose = verbose
+        self.delay = delay          # wait 2 seconds by default
         self.skip_thumbs = skip_thumbs
         self.thumbs_only = thumbs_only
         self.follow_child_threads = follow_child_threads
