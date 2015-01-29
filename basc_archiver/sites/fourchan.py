@@ -113,153 +113,166 @@ class FourChanSiteArchiver(BaseSiteArchiver):
         self.threads[thread_id] = {
             'board': board_name,
             'dir': self.base_thread_dir.format(board=board_name, thread=thread_id),
-            'id': thread_id,
+            'thread_id': thread_id,
         }
 
-        self.add_to_dl('thread', id=thread_id)
+        self.add_to_dl('thread', board=board_name, thread_id=thread_id)
 
     def download_item(self, item):
         """Download the given item."""
-        print('downloading:', item.dl_type, item.info['id'])
-
-
-    def _download_thread(self, thread):
-        """Download the given thread, from the thread info."""
-        # skip if no new posts
-        if 'thread' in thread:
-            new_replies = thread['thread'].update()
-            if new_replies < 1:
-                # skip if no new posts
-                return True
-            elif thread['thread'].is_404:
-                # thread 404'd
-                print("Thread /{}/{} 404'd.".format(thread['board'], thread['id']))
-                del self.threads[thread['id']]
-                return True
-        else:
-            running_board = self.boards[thread['board']]
-            self.threads[thread['id']]['thread'] = running_board.get_thread(thread['id'])
-            thread['thread'] = self.threads[thread['id']]['thread']
-
-        # download
-        if not self.options.silent:
-            print('4chan Thread: /{}/{}'.format(thread['board'], thread['id']))
-
-        utils.mkdirs(thread['dir'])
-
         http_header = ('https://' if self.options.use_ssl else 'http://')
 
         # images
-        if not self.options.thumbs_only:
-            image_dir = os.path.join(thread['dir'], _IMAGE_DIR_NAME)
-            utils.mkdirs(image_dir)
+        if item.dl_type == 'image':
+            if self.options.thumbs_only:
+                return True
 
+            board_name = item.info['board']
+            thread_id = item.info['thread_id']
+            images_dir = self.base_images_dir.format(board=board_name, thread=thread_id)
+            filename = item.info['filename']
+
+            file_url = http_header + FOURCHAN_IMAGES_URL % (board_name, filename)
+            file_path = os.path.join(images_dir, filename)
+
+            if not os.path.exists(file_path):
+                utils.mkdirs(images_dir)
+                if utils.download_file(file_path, file_url):
+                    if not self.options.silent:
+                        print('  Image {} / {} / {} downloaded'.format(board_name, thread_id, filename))
+
+        # thumbnails
+        elif item.dl_type == 'thumb':
+            if self.options.skip_thumbs:
+                return True
+
+            board_name = item.info['board']
+            thread_id = item.info['thread_id']
+            thumbs_dir = self.base_thumbs_dir.format(board=board_name, thread=thread_id)
+            filename = item.info['filename']
+
+            file_url = http_header + FOURCHAN_THUMBS_URL % (board_name, filename)
+            file_path = os.path.join(thumbs_dir, filename)
+
+            if not os.path.exists(file_path):
+                utils.mkdirs(thumbs_dir)
+                if utils.download_file(file_path, file_url):
+                    if not self.options.silent:
+                        print('  Thumbnail {} / {} / {} downloaded'.format(board_name, thread_id, filename))
+
+        # thread
+        elif item.dl_type == 'thread':
+            board_name = item.info['board']
+            thread_id = item.info['thread_id']
+            thread_dir = self.base_thread_dir.format(board=board_name, thread=thread_id)
+
+            thread = self.threads[thread_id]
+            with self.boards_lock:
+                # skip if no new posts
+                if 'thread' in thread:
+                    new_replies = thread['thread'].update()
+                    if new_replies < 1:
+                        # skip if no new posts
+                        item.delay_dl_timestamp()
+                        self.add_to_dl(item=item)
+                        return True
+                    elif thread['thread'].is_404:
+                        # thread 404'd
+                        print("Thread {} / {} 404'd.".format(board_name, thread_id))
+                        del self.threads[thread_id]
+                        return True
+                else:
+                    running_board = self.boards[board_name]
+                    running_thread = running_board.get_thread(thread_id)
+                    self.threads[thread_id]['thread'] = running_thread
+                    thread['thread'] = running_thread
+                    new_replies = len(running_thread.all_posts)
+
+            # thread
+            if not self.options.silent:
+                print('4chan Thread {} / {}  -  {} new replies'.format(board_name, thread_id, new_replies))
+
+            utils.mkdirs(thread_dir)
+
+            # record external urls and follow child threads
+            external_urls_filename = os.path.join(thread_dir, EXT_LINKS_FILENAME)
+            with codecs.open(external_urls_filename, 'w', encoding='utf-8') as external_urls_file:
+                # all posts, including topic
+                all_posts = [thread['thread'].topic]
+                for reply in all_posts:
+                    if reply.comment is None:
+                        continue
+
+                    # 4chan puts <wbr> in middle of urls for word break, remove them
+                    cleaned_comment = re.sub(r'\<wbr\>', '', reply.comment)
+
+                    # child threads
+                    if self.options.follow_child_threads:
+                        for child_board, child_id in CHILDREGEX.findall(cleaned_comment):
+                            is_same_board = child_board == board_name
+                            child_id = int(child_id)
+
+                            if child_id not in self.threads:
+                                if self.options.follow_to_other_boards or not self.options.follow_to_other_boards and is_same_board:
+                                    print('4chan child thread {} / {} found and now being downloaded'.format(child_board, child_id))
+                                    self._add_thread_from_info(child_board, child_id)
+
+                    # external urls
+                    if not URLREGEX.findall(reply.comment):
+                        continue
+
+                    for found in URLREGEX.findall(cleaned_comment):
+                        for url in found:
+                            if url:
+                                external_urls_file.write('{}\n'.format(url))
+
+            # dump 4chan json file, pretty printed
+            local_filename = os.path.join(thread_dir, '{}.json'.format(thread_id))
+            url = http_header + FOURCHAN_API_URL % (board_name, thread_id)
+            utils.download_json(local_filename, url, clobber=True)
+
+            # and output thread html file
+            local_filename = os.path.join(thread_dir, '{}.html'.format(thread_id))
+            url = http_header + FOURCHAN_BOARDS_URL % (board_name, thread_id)
+
+            if utils.download_file(local_filename, url, clobber=True):
+                # get css files
+                css_dir = os.path.join(thread_dir, _CSS_DIR_NAME)
+                utils.mkdirs(css_dir)
+
+                css_regex = re.compile(FOURCHAN_CSS_REGEX)
+                found_css_files = css_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
+                for css_filename in found_css_files:
+                    local_css_filename = os.path.join(css_dir, css_filename)
+                    url = http_header + FOURCHAN_STATIC + '/css/' + css_filename
+                    utils.download_file(local_css_filename, url)
+
+                # get js files
+                js_dir = os.path.join(thread_dir, _JS_DIR_NAME)
+                utils.mkdirs(js_dir)
+
+                js_regex = re.compile(FOURCHAN_JS_REGEX)
+                found_js_files = js_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
+                for js_filename in found_js_files:
+                    local_js_filename = os.path.join(js_dir, js_filename)
+                    url = http_header + FOURCHAN_STATIC + '/js/' + js_filename
+                    utils.download_file(local_js_filename, url)
+
+                # convert links to local links
+                utils.file_replace(local_filename, '"//', '"' + http_header)
+                utils.file_replace(local_filename, FOURCHAN_IMAGES_URL_REGEX, _IMAGE_DIR_NAME + '/')
+                utils.file_replace(local_filename, FOURCHAN_THUMBS_URL_REGEX, _THUMB_DIR_NAME + '/')
+                utils.file_replace(local_filename, FOURCHAN_CSS_URL_REGEX, _CSS_DIR_NAME + '/')
+                utils.file_replace(local_filename, FOURCHAN_JS_URL_REGEX, _JS_DIR_NAME + '/')
+
+            # add images to dl queue
             for filename in thread['thread'].filenames():
-                file_url = http_header + FOURCHAN_IMAGES_URL % (thread['board'], filename)
-                file_path = os.path.join(image_dir, filename)
-                
-                if not os.path.exists(file_path):
-                    # delay the download to reduce stress on server
-                    time.sleep(float(self.options.delay))
-                    if utils.download_file(file_path, file_url):
-                        if not self.options.silent:
-                            print('  Image:', filename, 'downloaded.')
+                self.add_to_dl(dl_type='image', board=board_name, thread_id=thread_id, filename=filename)
 
-        # thumbs
-        if self.options.thumbs_only or not self.options.skip_thumbs:
-            thumb_dir = os.path.join(thread['dir'], _THUMB_DIR_NAME)
-            utils.mkdirs(thumb_dir)
+            # add thumbs to dl queue
+            for filename in thread['thread'].thumbnames():
+                self.add_to_dl(dl_type='thumb', board=board_name, thread_id=thread_id, filename=filename)
 
-            for thumbname in thread['thread'].thumbnames():
-                thumb_url = http_header + FOURCHAN_THUMBS_URL % (thread['board'], thumbname)
-                file_path = os.path.join(thumb_dir, thumbname)
-                
-                if not os.path.exists(file_path):
-                    # delay the download to reduce stress on server
-                    time.sleep(float(self.options.delay))
-                    if utils.download_file(file_path, thumb_url):
-                        if not self.options.silent:
-                            print('  Thumbnail:', thumbname, 'downloaded.')
-
-        # record external urls and follow child threads
-        external_urls_filename = os.path.join(thread['dir'], EXT_LINKS_FILENAME)
-        with codecs.open(external_urls_filename, 'w', encoding='utf-8') as external_urls_file:
-            # all posts, including topic
-            all_posts = [thread['thread'].topic]
-            all_posts.extend(thread['thread'].replies)
-            for reply in all_posts:
-                if reply.comment is None:
-                    continue
-
-                # 4chan puts <wbr> in middle of urls for word break, remove them
-                cleaned_comment = re.sub(r'\<wbr\>', '', reply.comment)
-
-                # child threads
-                if self.options.follow_child_threads:
-                    for child_board, child_id in CHILDREGEX.findall(cleaned_comment):
-                        is_same_board = child_board == thread['board']
-                        child_id = int(child_id)
-
-                        if child_id not in self.threads:
-                            if self.options.follow_to_other_boards or not self.options.follow_to_other_boards and is_same_board:
-                                print('  Child thread /{}/{} found and being added/downloaded'.format(child_board, child_id))
-                                self._add_thread_from_info(child_board, child_id)
-                                try:
-                                    self._download_thread(self.threads[child_id])
-                                except:
-                                    # assume recursion got us, skip and do on next download
-                                    print('    There was a problem downloading this thread. Skipping for now.')
-
-                # external urls
-                if not URLREGEX.findall(reply.comment):
-                    continue
-
-                for found in URLREGEX.findall(cleaned_comment):
-                    for url in found:
-                        if url:
-                            external_urls_file.write('{}\n'.format(url))
-
-        # dump 4chan json file, pretty printed
-        local_filename = os.path.join(thread['dir'], '{}.json'.format(thread['id']))
-        url = http_header + FOURCHAN_API_URL % (thread['board'], thread['id'])
-
-        if utils.download_json(local_filename, url, clobber=True):
-            if not self.options.silent:
-                print('  Thread JSON downloaded.')
-
-        # and output thread html file
-        local_filename = os.path.join(thread['dir'], '{}.html'.format(thread['id']))
-        url = http_header + FOURCHAN_BOARDS_URL % (thread['board'], thread['id'])
-
-        if utils.download_file(local_filename, url, clobber=True):
-            # get css files
-            css_dir = os.path.join(thread['dir'], _CSS_DIR_NAME)
-            utils.mkdirs(css_dir)
-
-            css_regex = re.compile(FOURCHAN_CSS_REGEX)
-            found_css_files = css_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
-            for css_filename in found_css_files:
-                local_css_filename = os.path.join(css_dir, css_filename)
-                url = http_header + FOURCHAN_STATIC + '/css/' + css_filename
-                utils.download_file(local_css_filename, url)
-
-            # get js files
-            js_dir = os.path.join(thread['dir'], _JS_DIR_NAME)
-            utils.mkdirs(js_dir)
-
-            js_regex = re.compile(FOURCHAN_JS_REGEX)
-            found_js_files = js_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
-            for js_filename in found_js_files:
-                local_js_filename = os.path.join(js_dir, js_filename)
-                url = http_header + FOURCHAN_STATIC + '/js/' + js_filename
-                utils.download_file(local_js_filename, url)
-
-            # convert links to local links
-            utils.file_replace(local_filename, '"//', '"' + http_header)
-            utils.file_replace(local_filename, FOURCHAN_IMAGES_URL_REGEX, _IMAGE_DIR_NAME + '/')
-            utils.file_replace(local_filename, FOURCHAN_THUMBS_URL_REGEX, _THUMB_DIR_NAME + '/')
-            utils.file_replace(local_filename, FOURCHAN_CSS_URL_REGEX, _CSS_DIR_NAME + '/')
-            utils.file_replace(local_filename, FOURCHAN_JS_URL_REGEX, _JS_DIR_NAME + '/')
-
-            if not self.options.silent:
-                print('  Thread HTML downloaded.')
+            # queue for next dl
+            item.delay_dl_timestamp(self.options.thread_check_delay)
+            self.add_to_dl(item=item)
