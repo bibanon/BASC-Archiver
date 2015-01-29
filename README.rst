@@ -72,7 +72,7 @@ or installed with the PyPi package `BASC-Archiver <https://pypi.python.org/pypi/
 Linux and OSX
 -------------
 
-1. Make sure you have Python installed.
+1. Make sure you have Python installed. Here's a `Mac OS X Installation Guide. <http://docs.python-guide.org/en/latest/starting/install/osx/>`_ Note that almost all Linux distros have Python preinstalled.
 2. Run ``easy_install basc-archiver``
 3. Run ``thread-archiver http://boards.4chan.org/etc/thread/12345``
 
@@ -87,7 +87,9 @@ Windows
 
 Using the Windows version will become simpler once we finish writing the GUI.
 
-
 License
 =======
-BASC-Archiver is licensed under the GNU Lesser General Public License v3.
+
+Bibliotheca Anonoma Imageboard Thread Archiver (BASC Archiver)
+
+Copyright (C) 2014 Antonizoon Overtwater, Daniel Oaks. Licensed under the GNU Lesser General Public License v3.
