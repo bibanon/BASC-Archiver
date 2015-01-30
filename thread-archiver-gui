@@ -9,6 +9,7 @@ import sys
 import os
 
 import appdirs
+import threading
 from PySide import QtGui
 
 from basc_archiver.gui import Ui_MainWindow
@@ -31,6 +32,7 @@ class GuiOptions(Options):
         use_ssl = self.config.get('use_ssl', False)
         silent = self.config.get('silent', False)
         verbose = self.config.get('verbose', False)
+        thread_check_delay = self.config.get('thread_check_delay', 90)
         skip_thumbs = self.config.get('skip_thumbs', False)
         thumbs_only = self.config.get('thumbs_only', False)
         follow_child_threads = self.config.get('follow_child_threads', False)
@@ -39,6 +41,7 @@ class GuiOptions(Options):
         # create actual options object
         super(GuiOptions, self).__init__(base_dir, use_ssl=use_ssl,
                                          silent=silent, verbose=verbose,
+                                         thread_check_delay=thread_check_delay,
                                          skip_thumbs=skip_thumbs, thumbs_only=thumbs_only,
                                          follow_child_threads=follow_child_threads,
                                          follow_to_other_boards=follow_to_other_boards)
@@ -63,10 +66,20 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
+        self.thread_list_lock = threading.Lock()
+        self.thread_list = []
+
         # make sure we have an archiver to attach to
         if archiver is None:
             raise Exception('The `archiver` attribute must be set when instantiating MainWindow')
         self.archiver = archiver
+
+        # connect up status
+        self.archiver.register_callback('new_thread', self.status_new_thread)
+        self.archiver.register_callback('thread_dl', self.status_dl)
+        self.archiver.register_callback('image_dl', self.status_dl)
+        self.archiver.register_callback('thumb_dl', self.status_dl)
+        self.archiver.register_callback('404', self.status_404)
 
         # set options
         self.saveWarc.setEnabled(False)  # until we support WARC files
@@ -111,7 +124,9 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         single_download = self.singleDownload.isChecked()
         minutes = self.checkMinutes.value()
 
-        self._add_thread_list_entry('4chan', random.choice(['tg', 'gd', 'mu']), random.randint(100000,900000), 'description-of-thread')
+        self.archiver.add_thread(text)
+
+        # self._add_thread_list_entry('4chan', random.choice(['tg', 'gd', 'mu']), random.randint(100000,900000), 'description-of-thread')
 
         if text:
             print('adding thread:', text)
@@ -120,6 +135,53 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             else:
                 print('  checking thread every', minutes, 'minutes')
             self.threadUrl.clear()
+
+    def status_new_thread(self, cb_name, info):
+        """basc_archiver added a new thread."""
+        site = info['site']
+        board = info['board']
+        thread_id = info['thread_id']
+        # slug = info['slug']
+        slug = 'test-slug'
+
+        self._add_thread_list_entry(site, board, thread_id, slug)
+        with self.thread_list_lock:
+            self.thread_list.insert(0, {
+                'site': site,
+                'board': board,
+                'thread_id': thread_id
+            })
+
+    def status_dl(self, cb_name, info):
+        """basc_archiver dl'd something."""
+        site = info['site']
+        board = info['board']
+        thread_id = info['thread_id']
+
+        with self.thread_list_lock:
+            for i, lst in enumerate(self.thread_list):
+                if site == lst['site'] and board == lst['board'] and thread_id == lst['thread_id']:
+                    status = None
+                    if cb_name == 'thread_dl':
+                        status = 'Thread HTML Downloaded'
+                    elif cb_name == 'image_dl':
+                        status = 'Image Downloaded ({}/{})'.format(info['images_downloaded'], info['total_files'])
+                    elif cb_name == 'thumb_dl':
+                        status = 'Thumbnail Downloaded ({}/{})'.format(info['thumbs_downloaded'], info['total_files'])
+                    if status is not None:
+                        self.threadList.setItem(i, 4, QtGui.QTableWidgetItem(status))
+
+    def status_404(self, cb_name, info):
+        """basc_archiver dl'd something."""
+        site = info['site']
+        board = info['board']
+        thread_id = info['thread_id']
+
+        with self.thread_list_lock:
+            for i, lst in enumerate(self.thread_list):
+                if site == lst['site'] and board == lst['board'] and thread_id == lst['thread_id']:
+                    text = "Thread No Longer Exists"
+                    self.threadList.setItem(i, 4, QtGui.QTableWidgetItem(text))
 
     def add_from_clipboard(self):
         print('adding thread from clipboard')
