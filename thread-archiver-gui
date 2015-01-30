@@ -4,6 +4,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import random
+import time
 import json
 import sys
 import os
@@ -14,6 +15,33 @@ from PySide import QtGui
 
 from basc_archiver.gui import Ui_MainWindow
 from basc_archiver import Options, Archiver
+
+
+class ThreadSecondsCounter(threading.Thread):
+    """Counts the seconds down in the thread counter."""
+    STATUS_DELAY = 3  # 3 seconds before setting new statuses
+
+    def __init__(self, gui):
+        self.gui = gui
+        self.daemon = True
+        self.start()
+
+    def run(self):
+        while True:
+            # gui shutdown
+            if not self.gui.running:
+                exit(0)
+
+            current_ts = time.time()
+
+            with gui.thread_list_lock:
+                for i, lst in enumerate(self.thread_list):
+                    if lst['last_status'] + self.STATUS_DELAY < current_ts:
+                        if lst['next_dl'] is not None:
+                            seconds = lst['next_dl'] - current_ts
+                            self._set_status(i, 'Waiting {} seconds'.format(seconds))
+
+            time.sleep(1)
 
 
 class GuiOptions(Options):
@@ -66,6 +94,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
+        self.running = True
+
         self.thread_list_lock = threading.Lock()
         self.thread_list = []
 
@@ -98,10 +128,13 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.addThread.clicked.connect(self.add_thread)
         self.addFromClipboard.clicked.connect(self.add_from_clipboard)
 
+        # startup thread seconds counter
+        ThreadSecondsCounter(self)
+
     def show_about(self):
         QtGui.QMessageBox.about(self, 'BASC-Archiver', '<center><h1>BASC-Archiver</h1></center> The <b>BASC Archiver</b> is a Python library used to archive imageboard threads. It uses the 4chan API with the py4chan wrapper. Developers are free to use the BASC-Archiver library for some interesting third-party applications, as it is licensed under the LGPLv3.')
 
-    def _add_thread_list_entry(self, site, board, thread_id, slug):
+    def _add_thread_list_entry(self, site, board, thread_id, slug, status):
         self.threadList.insertRow(0)
 
         twi = QtGui.QTableWidgetItem(site)
@@ -116,8 +149,17 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         twi = QtGui.QTableWidgetItem(slug)
         self.threadList.setItem(0, 3, twi)
 
-        twi = QtGui.QTableWidgetItem('Waiting {} seconds'.format(random.randint(3, 180)))
+        twi = QtGui.QTableWidgetItem(status)
         self.threadList.setItem(0, 4, twi)
+
+    def _set_status(self, table_y, status):
+        """Sets status of the given thread object in our table.
+
+        This function is NOT THREAD SAFE, and the calling function must have obtained
+        the self.thread_list_lock lock BEFORE CALLING THIS FUNCTION. Or else,
+        everything will probably die.
+        """
+        self.threadList.setItem(table_y, 4, QtGui.QTableWidgetItem(status))
 
     def add_thread(self):
         text = self.threadUrl.text()
@@ -125,8 +167,6 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         minutes = self.checkMinutes.value()
 
         self.archiver.add_thread(text)
-
-        # self._add_thread_list_entry('4chan', random.choice(['tg', 'gd', 'mu']), random.randint(100000,900000), 'description-of-thread')
 
         if text:
             print('adding thread:', text)
@@ -143,13 +183,16 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         thread_id = info['thread_id']
         # slug = info['slug']
         slug = 'test-slug'
+        status = 'Downloading'
 
-        self._add_thread_list_entry(site, board, thread_id, slug)
+        self._add_thread_list_entry(site, board, thread_id, slug, status)
         with self.thread_list_lock:
             self.thread_list.insert(0, {
                 'site': site,
                 'board': board,
-                'thread_id': thread_id
+                'thread_id': thread_id,
+                'last_status': time.time(),
+                'next_dl': None,
             })
 
     def status_dl(self, cb_name, info):
@@ -169,7 +212,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     elif cb_name == 'thumb_dl':
                         status = 'Thumbnail Downloaded ({}/{})'.format(info['thumbs_downloaded'], info['total_files'])
                     if status is not None:
-                        self.threadList.setItem(i, 4, QtGui.QTableWidgetItem(status))
+                        self._set_status(i, status)
 
     def status_404(self, cb_name, info):
         """basc_archiver dl'd something."""
@@ -180,8 +223,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         with self.thread_list_lock:
             for i, lst in enumerate(self.thread_list):
                 if site == lst['site'] and board == lst['board'] and thread_id == lst['thread_id']:
-                    text = "Thread No Longer Exists"
-                    self.threadList.setItem(i, 4, QtGui.QTableWidgetItem(text))
+                    status = 'Thread No Longer Exists'
+                    self._set_status(i, status)
 
     def add_from_clipboard(self):
         print('adding thread from clipboard')
