@@ -306,4 +306,5 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
             with self.threads_lock:
                 status_info = self.threads[thread_id]
+            status_info['next_dl'] = item.next_dl_timestamp
             self.update_status('thread_dl', info=status_info)
