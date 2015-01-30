@@ -16,15 +16,15 @@ class DownloadItem(object):
     def __init__(self, dl_type, info):
         self.dl_type = dl_type
         self.info = info
-        self._dl_timestamp = 0
+        self.next_dl_timestamp = 0
 
     def can_dl(self):
         """True if you can download this item."""
-        return time.time() >= self._dl_timestamp
+        return time.time() >= self.next_dl_timestamp
 
     def delay_dl_timestamp(self, delay_in_seconds=90):
         """Delay the download of this item for 90 seconds."""
-        self._dl_timestamp = time.time() + delay_in_seconds
+        self.next_dl_timestamp = time.time() + delay_in_seconds
 
 
 class DownloadThread(threading.Thread):
