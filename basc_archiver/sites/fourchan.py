@@ -183,6 +183,10 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             thread_id = item.info['thread_id']
             thread_dir = self.base_thread_dir.format(board=board_name, thread=thread_id)
 
+            with self.threads_lock:
+                status_info = self.threads[thread_id]
+            self.update_status('thread_start_download', info=status_info)
+
             thread = self.threads[thread_id]
             with self.boards_lock:
                 # skip if no new posts
