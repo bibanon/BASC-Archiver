@@ -115,6 +115,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.archiver.register_callback('image_dl', self.status_dl)
         self.archiver.register_callback('thumb_dl', self.status_dl)
         self.archiver.register_callback('404', self.status_404)
+        self.archiver.register_callback('thread_start_download', self.status_start_dl)
 
         # set options
         self.saveWarc.setEnabled(False)  # until we support WARC files
@@ -220,6 +221,18 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     if status is not None:
                         self.thread_list[i]['last_status'] = time.time()
                         self._set_status(i, status)
+
+    def status_start_dl(self, cb_name, info):
+        """basc_archiver started to dl a thread."""
+        site = info['site']
+        board = info['board']
+        thread_id = info['thread_id']
+
+        with self.thread_list_lock:
+            for i, lst in enumerate(self.thread_list):
+                if site == lst['site'] and board == lst['board'] and thread_id == lst['thread_id']:
+                    status = 'Downloading'
+                    self._set_status(i, status)
 
     def status_404(self, cb_name, info):
         """basc_archiver dl'd something."""
