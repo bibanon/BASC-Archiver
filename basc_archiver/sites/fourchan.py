@@ -195,6 +195,12 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                     if new_replies < 1:
                         # skip if no new posts
                         item.delay_dl_timestamp()
+
+                        with self.threads_lock:
+                            status_info = self.threads[thread_id]
+                        status_info['next_dl'] = item.next_dl_timestamp
+                        self.update_status('thread_dl', info=status_info)
+
                         self.add_to_dl(item=item)
                         return True
                     elif thread['thread'].is_404:
