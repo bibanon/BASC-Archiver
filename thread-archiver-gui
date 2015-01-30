@@ -22,6 +22,7 @@ class ThreadSecondsCounter(threading.Thread):
     STATUS_DELAY = 3  # 3 seconds before setting new statuses
 
     def __init__(self, gui):
+        threading.Thread.__init__(self)
         self.gui = gui
         self.daemon = True
         self.start()
@@ -34,12 +35,16 @@ class ThreadSecondsCounter(threading.Thread):
 
             current_ts = time.time()
 
-            with gui.thread_list_lock:
-                for i, lst in enumerate(self.thread_list):
+            with self.gui.thread_list_lock:
+                for i, lst in enumerate(self.gui.thread_list):
                     if lst['last_status'] + self.STATUS_DELAY < current_ts:
                         if lst['next_dl'] is not None:
-                            seconds = lst['next_dl'] - current_ts
-                            self._set_status(i, 'Waiting {} seconds'.format(seconds))
+                            seconds = int(lst['next_dl'] - current_ts)
+                            if seconds < 1:
+                                status = 'Waiting'
+                            else:
+                                status = 'Waiting {} seconds'.format(seconds)
+                            self.gui._set_status(i, status)
 
             time.sleep(1)
 
@@ -207,11 +212,13 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     status = None
                     if cb_name == 'thread_dl':
                         status = 'Thread HTML Downloaded'
+                        self.thread_list[i]['next_dl'] = info['next_dl']
                     elif cb_name == 'image_dl':
                         status = 'Image Downloaded ({}/{})'.format(info['images_downloaded'], info['total_files'])
                     elif cb_name == 'thumb_dl':
                         status = 'Thumbnail Downloaded ({}/{})'.format(info['thumbs_downloaded'], info['total_files'])
                     if status is not None:
+                        self.thread_list[i]['last_status'] = time.time()
                         self._set_status(i, status)
 
     def status_404(self, cb_name, info):
