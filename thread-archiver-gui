@@ -119,6 +119,17 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         # set options
         self.saveWarc.setEnabled(False)  # until we support WARC files
+        # TODO: set rest of option buttons according to options
+        # TODO: make sure that clicking option buttons updates button object in-memory and on-disk
+        # TODO: make slug/status columns double the width of others
+        # TODO: make sure adding URL is added to the options, also keep track of whether thread
+        #   has 404'd in options, so we don't need to recheck /those/ ones on startup
+        # TODO: change minutes to seconds in 'Check every x minutes' display, and actually have it
+        #   set the proper download delay with the library (will require changes to threaded arch)
+        # TODO: in thread_dl status, show how many new replies there were
+        # TODO: with thread_dl status, force it to display for a second or two (before the image/
+        #   thumbnail stuff starts flooding in?) Maybe a var to force no status changes until X
+        #   X timestamp has passed?
 
         # setting up thread list
         self.threadList.setEditTriggers(QtGui.QAbstractItemView.EditTriggers())  # disable cell editing
@@ -232,6 +243,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             for i, lst in enumerate(self.thread_list):
                 if site == lst['site'] and board == lst['board'] and thread_id == lst['thread_id']:
                     status = 'Downloading'
+                    self.thread_list[i]['last_status'] = time.time()
                     self._set_status(i, status)
 
     def status_404(self, cb_name, info):
@@ -244,6 +256,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             for i, lst in enumerate(self.thread_list):
                 if site == lst['site'] and board == lst['board'] and thread_id == lst['thread_id']:
                     status = 'Thread No Longer Exists'
+                    self.thread_list[i]['last_status'] = time.time()
                     self._set_status(i, status)
 
     def add_from_clipboard(self):
