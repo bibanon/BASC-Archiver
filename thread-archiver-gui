@@ -38,7 +38,13 @@ class ThreadSecondsCounter(threading.Thread):
             with self.gui.thread_list_lock:
                 for i, lst in enumerate(self.gui.thread_list):
                     if lst['last_status'] + self.STATUS_DELAY < current_ts:
-                        if lst['next_dl'] is not None:
+                        if lst['stopped']:
+                            # we set the status here because image / thumb dl messages may
+                            #   override the 'stopped' message. Could make this more complex
+                            #   but we should do that later, once we know it's needed
+                            status = 'Stopped'
+                            self.gui._set_status(i, status)
+                        elif lst['next_dl'] is not None:
                             seconds = int(lst['next_dl'] - current_ts)
                             if seconds < 1:
                                 status = 'Waiting'
@@ -225,6 +231,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     if cb_name == 'thread_dl':
                         status = 'Thread HTML Downloaded'
                         self.thread_list[i]['next_dl'] = info['next_dl']
+                        self.thread_list[i]['stopped'] = info['stopped']
                     elif cb_name == 'image_dl':
                         status = 'Image Downloaded ({}/{})'.format(info['images_downloaded'], info['total_files'])
                     elif cb_name == 'thumb_dl':
