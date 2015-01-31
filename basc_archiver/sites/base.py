@@ -16,14 +16,18 @@ class DownloadItem(object):
     def __init__(self, dl_type, info):
         self.dl_type = dl_type
         self.info = info
+        if not hasattr(self.info, 'download_delay_in_seconds'):
+            self.info['download_delay_in_seconds'] = 90  # default
         self.next_dl_timestamp = 0
 
     def can_dl(self):
         """True if you can download this item."""
         return time.time() >= self.next_dl_timestamp
 
-    def delay_dl_timestamp(self, delay_in_seconds=90):
-        """Delay the download of this item for 90 seconds."""
+    def delay_dl_timestamp(self, delay_in_seconds=None):
+        """Delay the download of this item for X seconds."""
+        if delay_in_seconds is None:
+            delay_in_seconds = self.info['download_delay_in_seconds']
         self.next_dl_timestamp = time.time() + delay_in_seconds
 
 
@@ -103,10 +107,11 @@ class BaseSiteArchiver(object):
     # download
     def add_to_dl(self, dl_type=None, item=None, **kwargs):
         """Add an item to our download list."""
+        info = kwargs
         if item is not None:
             new_item = item
         else:
-            new_item = DownloadItem(dl_type, kwargs)
+            new_item = DownloadItem(dl_type, info)
 
         with self.to_dl_lock:
             self.to_dl.append(new_item)

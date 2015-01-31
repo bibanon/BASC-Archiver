@@ -180,17 +180,17 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def add_thread(self):
         text = self.threadUrl.text()
-        single_download = self.singleDownload.isChecked()
-        minutes = self.checkMinutes.value()
+        only_download_once = self.singleDownload.isChecked()
+        dl_delay = self.checkSeconds.value()
 
-        self.archiver.add_thread(text)
+        self.archiver.add_thread(text, only_download_once=only_download_once, download_delay_in_seconds=dl_delay)
 
         if text:
             print('adding thread:', text)
-            if single_download:
+            if only_download_once:
                 print('  only downloading thread once')
             else:
-                print('  checking thread every', minutes, 'minutes')
+                print('  checking thread every', dl_delay, 'seconds')
             self.threadUrl.clear()
 
     def status_new_thread(self, cb_name, info):

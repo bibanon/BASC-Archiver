@@ -86,13 +86,15 @@ class FourChanSiteArchiver(BaseSiteArchiver):
         else:
             return [None, None]
 
-    def add_thread(self, url):
+    def add_thread(self, url, only_download_once=False, download_delay_in_seconds=90):
         """Add the given thread to our download list."""
         board_name, thread_id = self._url_info(url)
         thread_id = int(thread_id)
-        return self._add_thread_from_info(board_name, thread_id)
+        return self._add_thread_from_info(board_name, thread_id,
+                                          only_download_once=only_download_once,
+                                          download_delay_in_seconds=download_delay_in_seconds)
 
-    def _add_thread_from_info(self, board_name, thread_id):
+    def _add_thread_from_info(self, board_name, thread_id, only_download_once=False, download_delay_in_seconds=90):
         """Add a thread to our internal list from direct board name/thread id."""
         # already exists
         with self.threads_lock:
@@ -123,7 +125,9 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             status_info = self.threads[thread_id]
         self.update_status('new_thread', info=status_info)
 
-        self.add_to_dl('thread', board=board_name, thread_id=thread_id)
+        self.add_to_dl('thread', board=board_name, thread_id=thread_id,
+                       only_download_once=only_download_once,
+                       download_delay_in_seconds=download_delay_in_seconds)
 
     def download_item(self, item):
         """Download the given item."""
@@ -311,10 +315,15 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 self.add_to_dl(dl_type='thumb', board=board_name, thread_id=thread_id, filename=filename)
 
             # queue for next dl
-            item.delay_dl_timestamp(self.options.thread_check_delay)
-            self.add_to_dl(item=item)
+            if not item.info['only_download_once']:
+                item.delay_dl_timestamp(self.options.thread_check_delay)
+                self.add_to_dl(item=item)
 
             with self.threads_lock:
                 status_info = self.threads[thread_id]
-            status_info['next_dl'] = item.next_dl_timestamp
+            if item.info['only_download_once']:
+                status_info['stopped'] = True
+            else:
+                status_info['stopped'] = False
+                status_info['next_dl'] = item.next_dl_timestamp
             self.update_status('thread_dl', info=status_info)
