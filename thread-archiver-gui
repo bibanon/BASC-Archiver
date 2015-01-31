@@ -128,8 +128,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #   set the proper download delay with the library (will require changes to threaded arch)
         # TODO: in thread_dl status, show how many new replies there were
         # TODO: with thread_dl status, force it to display for a second or two (before the image/
-        #   thumbnail stuff starts flooding in?) Maybe a var to force no status changes until X
-        #   X timestamp has passed?
+        #   thumbnail stuff starts flooding in?) Maybe a var to force no status changes until a
+        #   timestamp has passed?
 
         # setting up thread list
         self.threadList.setEditTriggers(QtGui.QAbstractItemView.EditTriggers())  # disable cell editing

@@ -116,7 +116,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QSpinBox" name="checkMinutes">
+         <widget class="QSpinBox" name="checkSeconds">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -124,13 +124,16 @@
            </sizepolicy>
           </property>
           <property name="suffix">
-           <string> minutes</string>
+           <string> seconds</string>
           </property>
           <property name="prefix">
            <string>Check every </string>
           </property>
+          <property name="maximum">
+           <number>999999</number>
+          </property>
           <property name="value">
-           <number>3</number>
+           <number>90</number>
           </property>
          </widget>
         </item>

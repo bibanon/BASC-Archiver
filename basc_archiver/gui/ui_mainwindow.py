@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Fri Dec 12 20:53:35 2014
+# Created: Sat Jan 31 19:52:11 2015
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -66,15 +66,16 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addItem(spacerItem)
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.checkMinutes = QtGui.QSpinBox(self.centralWidget)
+        self.checkSeconds = QtGui.QSpinBox(self.centralWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.checkMinutes.sizePolicy().hasHeightForWidth())
-        self.checkMinutes.setSizePolicy(sizePolicy)
-        self.checkMinutes.setProperty("value", 3)
-        self.checkMinutes.setObjectName("checkMinutes")
-        self.verticalLayout_3.addWidget(self.checkMinutes)
+        sizePolicy.setHeightForWidth(self.checkSeconds.sizePolicy().hasHeightForWidth())
+        self.checkSeconds.setSizePolicy(sizePolicy)
+        self.checkSeconds.setMaximum(999999)
+        self.checkSeconds.setProperty("value", 90)
+        self.checkSeconds.setObjectName("checkSeconds")
+        self.verticalLayout_3.addWidget(self.checkSeconds)
         self.singleDownload = QtGui.QCheckBox(self.centralWidget)
         self.singleDownload.setObjectName("singleDownload")
         self.verticalLayout_3.addWidget(self.singleDownload)
@@ -121,8 +122,8 @@ class Ui_MainWindow(object):
         self.saveWarc.setText(QtGui.QApplication.translate("MainWindow", "Save WARC Files (recommended)", None, QtGui.QApplication.UnicodeUTF8))
         self.followChildren.setText(QtGui.QApplication.translate("MainWindow", "Follow Child Threads", None, QtGui.QApplication.UnicodeUTF8))
         self.followExternalBoards.setText(QtGui.QApplication.translate("MainWindow", "Follow to other boards", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkMinutes.setSuffix(QtGui.QApplication.translate("MainWindow", " minutes", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkMinutes.setPrefix(QtGui.QApplication.translate("MainWindow", "Check every ", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkSeconds.setSuffix(QtGui.QApplication.translate("MainWindow", " seconds", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkSeconds.setPrefix(QtGui.QApplication.translate("MainWindow", "Check every ", None, QtGui.QApplication.UnicodeUTF8))
         self.singleDownload.setText(QtGui.QApplication.translate("MainWindow", "Don\'t watch (one time download)", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
