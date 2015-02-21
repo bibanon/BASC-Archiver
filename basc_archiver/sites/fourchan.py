@@ -25,7 +25,7 @@ FOURCHAN_CDN = '4cdn.org'
 # cdn domains
 FOURCHAN_API = 'a.' + FOURCHAN_CDN
 FOURCHAN_IMAGES = 'i.' + FOURCHAN_CDN
-FOURCHAN_THUMBS = 't.' + FOURCHAN_CDN
+FOURCHAN_THUMBS = 'i.' + FOURCHAN_CDN
 FOURCHAN_STATIC = 's.' + FOURCHAN_CDN
 
 # retrieval footer regex
@@ -42,15 +42,15 @@ FOURCHAN_THUMBS_URL = FOURCHAN_THUMBS + FOURCHAN_THUMBS_FOOTER
 
 # html parsing regex
 HTTP_HEADER_UNIV = r"https?://"  # works for both http and https links
-FOURCHAN_IMAGES_REGEX = r"/\w+/"
-FOURCHAN_THUMBS_REGEX = r"/\w+/"
+FOURCHAN_IMAGES_REGEX = r"/\w+/([0-9]+\.[a-zA-Z0-9]+)"
+FOURCHAN_THUMBS_REGEX = r"/\w+/([0-9]+s\.[a-zA-Z0-9]+)"
 FOURCHAN_CSS_REGEX = r"/css/(\w+\.\d+.css)"
 FOURCHAN_JS_REGEX = r"/js/(\w+\.\d+.js)"
 CHILDREGEX = re.compile(r"""href="/([0-9a-zA-Z]+)/(?:res|thread)/([0-9]+)""")
 
 # regex links to 4chan servers
 FOURCHAN_IMAGES_URL_REGEX = re.compile(HTTP_HEADER_UNIV + FOURCHAN_IMAGES + FOURCHAN_IMAGES_REGEX)
-FOURCHAN_THUMBS_URL_REGEX = re.compile(HTTP_HEADER_UNIV + "(?:\d+.)?" + FOURCHAN_THUMBS + FOURCHAN_THUMBS_REGEX)
+FOURCHAN_THUMBS_URL_REGEX = re.compile(HTTP_HEADER_UNIV + FOURCHAN_THUMBS + FOURCHAN_THUMBS_REGEX)
 FOURCHAN_CSS_URL_REGEX = re.compile(HTTP_HEADER_UNIV + FOURCHAN_STATIC + '/css/')
 FOURCHAN_JS_URL_REGEX = re.compile(HTTP_HEADER_UNIV + FOURCHAN_STATIC + '/js/')
 
@@ -297,8 +297,8 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
                 # convert links to local links
                 utils.file_replace(local_filename, '"//', '"' + http_header)
-                utils.file_replace(local_filename, FOURCHAN_IMAGES_URL_REGEX, _IMAGE_DIR_NAME + '/')
-                utils.file_replace(local_filename, FOURCHAN_THUMBS_URL_REGEX, _THUMB_DIR_NAME + '/')
+                utils.file_replace(local_filename, FOURCHAN_IMAGES_URL_REGEX, _IMAGE_DIR_NAME + r'/\1')
+                utils.file_replace(local_filename, FOURCHAN_THUMBS_URL_REGEX, _THUMB_DIR_NAME + r'/\1')
                 utils.file_replace(local_filename, FOURCHAN_CSS_URL_REGEX, _CSS_DIR_NAME + '/')
                 utils.file_replace(local_filename, FOURCHAN_JS_URL_REGEX, _JS_DIR_NAME + '/')
 
