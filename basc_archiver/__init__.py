@@ -53,12 +53,14 @@ class Archiver:
             archiver.shutdown()
         
     # threads
-    def add_thread(self, url):
+    def add_thread(self, url, only_download_once=False, download_delay_in_seconds=90):
         """Archive the given thread if possible"""
         url_archived = False
         for archiver in self.archivers:
             if archiver.url_valid(url):
-                archiver.add_thread(url)
+                archiver.add_thread(url,
+                                    only_download_once=only_download_once,
+                                    download_delay_in_seconds=download_delay_in_seconds)
                 url_archived = True
         
         if url_archived:

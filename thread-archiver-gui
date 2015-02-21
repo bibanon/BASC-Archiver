@@ -11,7 +11,7 @@ import os
 
 import appdirs
 import threading
-from PySide import QtGui
+from PySide import QtCore, QtGui
 
 from basc_archiver.gui import Ui_MainWindow
 from basc_archiver import Options, Archiver
@@ -38,7 +38,7 @@ class ThreadSecondsCounter(threading.Thread):
             with self.gui.thread_list_lock:
                 for i, lst in enumerate(self.gui.thread_list):
                     if lst['last_status'] + self.STATUS_DELAY < current_ts:
-                        if lst['stopped']:
+                        if lst.get('stopped', False):
                             # we set the status here because image / thumb dl messages may
                             #   override the 'stopped' message. Could make this more complex
                             #   but we should do that later, once we know it's needed
@@ -142,7 +142,10 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.threadList.setColumnCount(5)
         self.threadList.setHorizontalHeaderLabels(['Site', 'Board', 'Thead ID', 'Slug', 'Status'])
         self.threadList.verticalHeader().setVisible(False)  # hide row numbers
-        self.threadList.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        # self.threadList.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.threadList.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)  # todo: make this stretch
+
+        self.threadList.verticalHeader().setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
         # connecting slots
         self.actionAbout.triggered.connect(self.show_about)
@@ -193,7 +196,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         only_download_once = self.singleDownload.isChecked()
         dl_delay = self.checkSeconds.value()
 
-        self.archiver.add_thread(text, only_download_once=only_download_once, download_delay_in_seconds=dl_delay)
+        worked = self.archiver.add_thread(text, only_download_once=only_download_once, download_delay_in_seconds=dl_delay)
 
         if text:
             print('adding thread:', text)
@@ -201,7 +204,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 print('  only downloading thread once')
             else:
                 print('  checking thread every', dl_delay, 'seconds')
-            self.threadUrl.clear()
+            if worked:
+                self.threadUrl.clear()
 
     def status_new_thread(self, cb_name, info):
         """basc_archiver added a new thread."""
