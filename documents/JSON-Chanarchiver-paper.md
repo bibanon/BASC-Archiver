@@ -85,8 +85,8 @@ Folder Design (Chart)
     |-- /b/style.css    # custom section style for all threads. This is copied into every thread folder.
     |-- /b/28392029
         |
-        |-- /b/28392029/img/
-        |-- /b/28392029/thumb/
+        |-- /b/28392029/images/
+        |-- /b/28392029/thumbs/
         |-- /b/28392029/style.css   # An Exact Copy of the `style.css` file in the folder above.
         |-- /b/28392029/thread.json
         |-- /b/28392029/thread.html
