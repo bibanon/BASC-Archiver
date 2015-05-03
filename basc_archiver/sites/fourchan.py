@@ -68,6 +68,7 @@ URLREGEX = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-
 
 class FourChanSiteArchiver(BaseSiteArchiver):
     name = '4chan'
+
     def __init__(self, options):
         BaseSiteArchiver.__init__(self, options)
 
@@ -147,7 +148,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             for filename in thread['thread'].filenames():
                 file_url = http_header + FOURCHAN_IMAGES_URL % (thread['board'], filename)
                 file_path = os.path.join(image_dir, filename)
-                
+
                 if not os.path.exists(file_path):
                     # delay the download to reduce stress on server
                     time.sleep(float(self.options.delay))
@@ -163,7 +164,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             for thumbname in thread['thread'].thumbnames():
                 thumb_url = http_header + FOURCHAN_THUMBS_URL % (thread['board'], thumbname)
                 file_path = os.path.join(thumb_dir, thumbname)
-                
+
                 if not os.path.exists(file_path):
                     # delay the download to reduce stress on server
                     time.sleep(float(self.options.delay))
