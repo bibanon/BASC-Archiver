@@ -254,3 +254,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
             if not self.options.silent:
                 print('  Thread HTML downloaded.')
+
+            if thread['thread'].closed:
+                print("4chan Thread /{}/{} is closed.".format(thread['board'], thread['id']))
+                del self.threads[thread['id']]
