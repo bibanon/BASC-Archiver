@@ -9,6 +9,7 @@ import os
 
 class BaseSiteArchiver(object):
     name = 'base'
+
     def __init__(self, options):
         if self.name == 'base':
             raise Exception('BaseSiteArchiver must be subclassed!')
