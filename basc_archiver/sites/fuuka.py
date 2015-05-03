@@ -9,6 +9,7 @@ from .base import BaseSiteArchiver
 
 class FuukaSiteArchiver(BaseSiteArchiver):
     name = 'fuuka'
+
     def __init__(self, options):
         BaseSiteArchiver.__init__(self, options)
 
