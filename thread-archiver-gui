@@ -63,19 +63,19 @@ class GuiOptions(Options):
 
         # open config file if it exists
         self._path = os.path.join(base_app_dir, 'config.json')
-        self.config = {}
-        self.load()
+        config_dict = self.load()
 
         # create settings
-        base_dir = self.config.get('base_dir', os.path.join(os.path.expanduser('~'), 'thread-archive'))
-        use_ssl = self.config.get('use_ssl', False)
-        silent = self.config.get('silent', False)
-        verbose = self.config.get('verbose', False)
-        thread_check_delay = self.config.get('thread_check_delay', 90)
-        skip_thumbs = self.config.get('skip_thumbs', False)
-        thumbs_only = self.config.get('thumbs_only', False)
-        follow_child_threads = self.config.get('follow_child_threads', False)
-        follow_to_other_boards = self.config.get('follow_to_other_boards', False)
+        base_dir = config_dict.get('base_dir', os.path.join(os.path.expanduser('~'), 'thread-archive'))
+        use_ssl = config_dict.get('use_ssl', False)
+        silent = config_dict.get('silent', False)
+        verbose = config_dict.get('verbose', False)
+        self.gui_single_dl = config_dict.get('gui_single_dl', False)
+        thread_check_delay = config_dict.get('thread_check_delay', 90)
+        skip_thumbs = config_dict.get('skip_thumbs', False)
+        thumbs_only = config_dict.get('thumbs_only', False)
+        follow_child_threads = config_dict.get('follow_child_threads', False)
+        follow_to_other_boards = config_dict.get('follow_to_other_boards', False)
 
         # create actual options object
         super(GuiOptions, self).__init__(base_dir, use_ssl=use_ssl,
@@ -85,17 +85,33 @@ class GuiOptions(Options):
                                          follow_child_threads=follow_child_threads,
                                          follow_to_other_boards=follow_to_other_boards)
 
+        self.save()
+
     def load(self):
         try:
             with open(self._path, 'r') as config_file:
                 config_string = config_file.read()
-                self.config = json.loads(config_string)
+                config_dict = json.loads(config_string)
         except FileNotFoundError:
-            self.config = {}
+            config_dict = {}
+        return config_dict
 
     def save(self):
+        config_dict = {
+            'base_dir': self.base_dir,
+            'use_ssl': self.use_ssl,
+            'silent': self.silent,
+            'verbose': self.verbose,
+            'gui_single_dl': self.gui_single_dl,
+            'thread_check_delay': self.thread_check_delay,
+            'skip_thumbs': self.skip_thumbs,
+            'thumbs_only': self.thumbs_only,
+            'follow_child_threads': self.follow_child_threads,
+            'follow_to_other_boards': self.follow_to_other_boards,
+        }
+
         with open(self._path, 'w') as config_file:
-            config_string = json.dumps(self.config)
+            config_string = json.dumps(config_dict, sort_keys=True, indent=4, separators=(',', ': '))
             config_file.write(config_string)
             config_file.write('\n')
 
@@ -125,6 +141,25 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         # set options
         self.saveWarc.setEnabled(False)  # until we support WARC files
+
+        if not self.archiver.options.skip_thumbs:
+            self.downloadThumbs.setCheckState(QtCore.Qt.Checked)
+        if not self.archiver.options.thumbs_only:
+            self.downloadImages.setCheckState(QtCore.Qt.Checked)
+
+        if self.archiver.options.follow_child_threads:
+            self.followChildren.setCheckState(QtCore.Qt.Checked)
+        if self.archiver.options.follow_to_other_boards:
+            self.followExternalBoards.setCheckState(QtCore.Qt.Checked)
+
+        if self.archiver.options.gui_single_dl:
+            self.singleDownload.setCheckState(QtCore.Qt.Checked)
+
+        self.downloadThumbs.clicked.connect(self.skip_thumbs_button)
+        self.downloadImages.clicked.connect(self.thumbs_only_button)
+        self.followChildren.clicked.connect(self.follow_child_threads_button)
+        self.followExternalBoards.clicked.connect(self.follow_to_other_boards_button)
+        self.singleDownload.clicked.connect(self.single_dl_button)
         # TODO: set rest of option buttons according to options
         # TODO: make sure that clicking option buttons updates button object in-memory and on-disk
         # TODO: make slug/status columns double the width of others
@@ -163,6 +198,27 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def show_preferences(self):
         QtGui.QMessageBox.about(self, 'BASC-Archiver', "<center><h1>Oh no!</h1></center> Preferences menu to go here, but it's not done yet! Sorry!")
+
+    # option buttons
+    def skip_thumbs_button(self):
+        self.archiver.options.skip_thumbs = not self.downloadThumbs.isChecked()
+        self.archiver.options.save()
+
+    def thumbs_only_button(self):
+        self.archiver.options.thumbs_only = not self.downloadImages.isChecked()
+        self.archiver.options.save()
+
+    def follow_child_threads_button(self):
+        self.archiver.options.follow_child_threads = self.followChildren.isChecked()
+        self.archiver.options.save()
+
+    def follow_to_other_boards_button(self):
+        self.archiver.options.follow_to_other_boards = self.followExternalBoards.isChecked()
+        self.archiver.options.save()
+
+    def single_dl_button(self):
+        self.archiver.options.gui_single_dl = self.singleDownload.isChecked()
+        self.archiver.options.save()
 
     def _add_thread_list_entry(self, site, board, thread_id, slug, status):
         self.threadList.insertRow(0)
