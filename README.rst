@@ -74,6 +74,8 @@ Linux and OSX
 
 1. Make sure you have Python installed. Here's a `Mac OS X Installation Guide. <http://docs.python-guide.org/en/latest/starting/install/osx/>`_ Note that almost all Linux distros have Python preinstalled.
 2. Run ``easy_install basc-archiver``
+
+   - Linux users must run this command as root, or prefix the command with `sudo`.
 3. Run ``thread-archiver http://boards.4chan.org/etc/thread/12345``
 
 Threads will be saved in ``./archive``, but you can change that by supplying a directory with the ``--path=`` argument.
