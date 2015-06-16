@@ -44,8 +44,8 @@ FOURCHAN_THUMBS_URL = FOURCHAN_THUMBS + FOURCHAN_THUMBS_FOOTER
 HTTP_HEADER_UNIV = r"https?://"  # works for both http and https links
 FOURCHAN_IMAGES_REGEX = r"/\w+/([0-9]+\.[a-zA-Z0-9]+)"
 FOURCHAN_THUMBS_REGEX = r"/\w+/([0-9]+s\.[a-zA-Z0-9]+)"
-FOURCHAN_CSS_REGEX = r"/css/(\w+\.\d+.css)"
-FOURCHAN_JS_REGEX = r"/js/(\w+\.\d+.js)"
+FOURCHAN_CSS_REGEX = r"/css/([\w\.\d]+.css)"
+FOURCHAN_JS_REGEX = r"/js/([\w\.\d]+.js)"
 CHILDREGEX = re.compile(r"""href="/([0-9a-zA-Z]+)/(?:res|thread)/([0-9]+)""")
 
 # regex links to 4chan servers

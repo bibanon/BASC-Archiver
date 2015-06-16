@@ -14,6 +14,7 @@ _default_base_dir = './archive'
 
 class Options:
     """Holds Archiver options."""
+
     def __init__(self, base_dir, use_ssl=False,
                  silent=False, verbose=False, delay=2, thread_check_delay=90,
                  skip_thumbs=False, thumbs_only=False, run_once=False,
@@ -33,6 +34,7 @@ class Options:
 
 class Archiver:
     """Archives the given imageboard threads."""
+
     def __init__(self, options=None):
         if options is None:
             options = Options(_default_base_dir)
@@ -60,7 +62,7 @@ class Archiver:
             if archiver.url_valid(url):
                 archiver.add_thread(url)
                 url_archived = True
-        
+
         if url_archived:
             return True
         else:
