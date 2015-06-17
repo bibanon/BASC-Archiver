@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 import os
 import sys
 
@@ -19,7 +18,7 @@ with open('README.rst') as file:
 
 setup(
     name='BA-4chan-thread-archiver',
-    version='0.8.3',
+    version='0.8.7',
     description='Makes a complete archive of imageboard threads including images, HTML, and JSON. (Notice: This is a transitional package, please migrate to BASC-Archiver)',
     long_description=long_description,
     author='Antonizoon Overtwater <antonizoon@bibanon.org>, Daniel Oaks <daniel@danieloaks.net>',
