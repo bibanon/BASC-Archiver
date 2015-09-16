@@ -72,11 +72,13 @@ class DownloadThread(threading.Thread):
 
 class BaseSiteArchiver(object):
     name = 'base'
+
     def __init__(self, handler_callback, options):
         if self.name == 'base':
             raise Exception('BaseSiteArchiver must be subclassed!')
         self.options = options
-        self.base_thread_dir = os.path.join(options.base_dir, '{}/{{board}}/{{thread}}/'.format(self.name))
+        self.base_thread_dir = os.path.join(options.base_dir,
+                                            '{}/{{board}}/{{thread}}/'.format(self.name))
         self.base_images_dir = os.path.join(self.base_thread_dir, 'images')
         self.base_thumbs_dir = os.path.join(self.base_thread_dir, 'thumbs')
 
