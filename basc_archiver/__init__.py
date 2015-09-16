@@ -53,7 +53,7 @@ class Archiver:
         """Shutdown the archiver."""
         for archiver in self.archivers:
             archiver.shutdown()
-        
+
     # threads
     def add_thread(self, url):
         """Archive the given thread if possible"""
@@ -91,7 +91,7 @@ class Archiver:
         """Remove a callback."""
         with self.callbacks_lock:
             if cb_type in self.callbacks and handler in self.callbacks[cb_type]:
-                self.callbacks[db_type].remove(handler)
+                self.callbacks[cb_type].remove(handler)
 
     def update_status(self, cb_type, info):
         """Update thread status, call callbacks where appropriate."""
@@ -107,4 +107,3 @@ class Archiver:
             for handler in self.callbacks['all']:
                 if handler not in called:
                     handler(cb_type, info)
-

@@ -52,7 +52,8 @@ def download_json(local_filename, url, clobber=False):
 
         # write reformatted json
         with open(local_filename, 'w') as json_file:
-            json_file.write(json.dumps(original_data, sort_keys=True, indent=2, separators=(',', ': ')))
+            json_file.write(json.dumps(original_data, sort_keys=True, indent=2,
+                                       separators=(',', ': ')))
 
 
 def file_replace(local_filename, pattern, replacement):
