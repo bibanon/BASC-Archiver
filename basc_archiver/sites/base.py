@@ -8,8 +8,8 @@ import os
 import time
 import threading
 
-DEFAULT_DL_WAIT_SECONDS = 1
-DEFAULT_DL_THREADS = 5
+DEFAULT_NOITEM_WAIT = 1
+DEFAULT_OK_WAIT = 0.1
 
 
 class DownloadItem(object):
@@ -28,11 +28,13 @@ class DownloadItem(object):
 
 
 class DownloadThread(threading.Thread):
-    def __init__(self, site, wait_seconds=1, success_wait_seconds=0.1):
+    def __init__(self, site,
+                 noitem_wait_seconds=DEFAULT_NOITEM_WAIT,
+                 nextitem_wait_seconds=DEFAULT_OK_WAIT):
         threading.Thread.__init__(self)
         self.site = site
-        self.wait_seconds = wait_seconds
-        self.success_wait_seconds = success_wait_seconds
+        self.noitem_wait_seconds = noitem_wait_seconds
+        self.nextitem_wait_seconds = nextitem_wait_seconds
         self.daemon = True
         self.start()
 
@@ -61,9 +63,9 @@ class DownloadThread(threading.Thread):
 
             # wait
             if next_item is None:
-                time.sleep(self.wait_seconds)
+                time.sleep(self.noitem_wait_seconds)
             else:
-                time.sleep(self.success_wait_seconds)
+                time.sleep(self.nextitem_wait_seconds)
 
 
 class BaseSiteArchiver(object):
@@ -89,8 +91,13 @@ class BaseSiteArchiver(object):
         self._handler_callback = handler_callback
 
         # start download threads
-        for i in range(getattr(self, 'dl_threads', DEFAULT_DL_THREADS)):
-            DownloadThread(self, getattr(self, 'dl_wait_seconds', DEFAULT_DL_WAIT_SECONDS))
+        for i in range(getattr(self, 'dl_threads', options.dl_threads_per_site)):
+            DownloadThread(self, **{
+                'noitem_wait_seconds': getattr(self, 'noitem_wait_seconds',
+                                               DEFAULT_NOITEM_WAIT),
+                'nextitem_wait_seconds': getattr(self, 'nextitem_wait_seconds',
+                                                 options.dl_thread_wait),
+            })
 
     def shutdown(self):
         """Shutdown this archiver."""

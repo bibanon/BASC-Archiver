@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # BASC Imageboard Archiver
-from __future__ import print_function
 from __future__ import absolute_import
-
+from __future__ import print_function
 import threading
 
 from .sites import default_archivers
@@ -16,20 +15,25 @@ class Options:
     """Holds Archiver options."""
 
     def __init__(self, base_dir, use_ssl=False,
-                 silent=False, verbose=False, delay=2, thread_check_delay=90,
-                 skip_thumbs=False, thumbs_only=False, run_once=False,
-                 follow_child_threads=False, follow_to_other_boards=False):
+                 silent=False, verbose=False,
+                 delay=2, thread_check_delay=90,
+                 dl_threads_per_site=5, dl_thread_wait=1,
+                 skip_thumbs=False, thumbs_only=False,
+                 follow_child_threads=False, follow_to_other_boards=False,
+                 run_once=False,):
         self.base_dir = base_dir
         self.use_ssl = use_ssl
         self.silent = silent
         self.verbose = verbose
         self.delay = float(delay)  # wait 2 seconds by default
         self.thread_check_delay = float(thread_check_delay)  # between checks of the same thread
+        self.dl_threads_per_site = int(dl_threads_per_site)
+        self.dl_thread_wait = float(dl_thread_wait)
         self.skip_thumbs = skip_thumbs
         self.thumbs_only = thumbs_only
-        self.run_once = run_once
         self.follow_child_threads = follow_child_threads
         self.follow_to_other_boards = follow_to_other_boards
+        self.run_once = run_once
 
 
 class Archiver:
