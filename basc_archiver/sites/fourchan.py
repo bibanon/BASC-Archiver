@@ -4,16 +4,24 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-from .base import BaseSiteArchiver, DownloadItem
+from .base import BaseSiteArchiver
 from .. import utils
 
 import basc_py4chan
 
 import os
 import re
-import time
 import codecs
 import threading
+
+THREAD_NONEXISTENT = 'Thread {site} / {board} / {thread_id} does not exist.'
+THREAD_NONEXISTENT_REASON = ("Either the thread already 404'ed, your URL is incorrect, "
+                             "or you aren't connected to the internet.")
+IMAGE_DL = '  Image {site} / {board} / {thread_id} / {filename} downloaded'
+THUMB_DL = '  Thumbnail {site} / {board} / {thread_id} / {filename} downloaded'
+THREAD_404 = "Thread {site} / {board} / {thread_id} 404'd."
+THREAD_NEW_REPLIES = 'Thread {site} / {board} / {thread_id}  -  {replies} new replies'
+THREAD_CHILD_FOUND = 'Child thread {site} / {board} / {thread_id} found and now being downloaded'
 
 # finding board name/thread id
 THREAD_REGEX = re.compile(r"""https?://(?:boards\.)?4chan\.org/([0-9a-zA-Z]+)/(?:res|thread)/([0-9]+)""")
@@ -69,6 +77,7 @@ URLREGEX = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-
 
 class FourChanSiteArchiver(BaseSiteArchiver):
     name = '4chan'
+
     def __init__(self, callback_handler, options):
         BaseSiteArchiver.__init__(self, callback_handler, options)
 
@@ -97,17 +106,22 @@ class FourChanSiteArchiver(BaseSiteArchiver):
         # already exists
         with self.threads_lock:
             if thread_id in self.threads:
-                return True
+                return False
 
         # running board object
         with self.boards_lock:
             if board_name not in self.boards:
-                self.boards[board_name] = basc_py4chan.Board(board_name, https=self.options.use_ssl)
+                self.boards[board_name] = basc_py4chan.Board(board_name,
+                                                             https=self.options.use_ssl)
             running_board = self.boards[board_name]
 
             if not running_board.thread_exists(thread_id):
-                print('4chan Thread {} / {} does not exist.'.format(board_name, thread_id))
-                print("Either the thread already 404'ed, your URL is incorrect, or you aren't connected to the internet.")
+                print(THREAD_NONEXISTENT.format(**{
+                    'site': self.name,
+                    'board': board_name,
+                    'thread_id': thread_id,
+                }))
+                print(THREAD_NONEXISTENT_REASON)
                 return False
 
         # add thread to download list
@@ -124,6 +138,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
         self.update_status('new_thread', info=status_info)
 
         self.add_to_dl('thread', board=board_name, thread_id=thread_id)
+        return True
 
     def download_item(self, item):
         """Download the given item."""
@@ -151,7 +166,12 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                         status_info['filename'] = filename
                     self.update_status('image_dl', info=status_info)
                     if not self.options.silent:
-                        print('  Image {} / {} / {} downloaded'.format(board_name, thread_id, filename))
+                        print(IMAGE_DL.format(**{
+                            'site': self.name,
+                            'board': board_name,
+                            'thread_id': thread_id,
+                            'filename': filename,
+                        }))
 
         # thumbnails
         elif item.dl_type == 'thumb':
@@ -175,7 +195,12 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                         status_info['filename'] = filename
                     self.update_status('thumb_dl', info=status_info)
                     if not self.options.silent:
-                        print('  Thumbnail {} / {} / {} downloaded'.format(board_name, thread_id, filename))
+                        print(THUMB_DL.format(**{
+                            'site': self.name,
+                            'board': board_name,
+                            'thread_id': thread_id,
+                            'filename': filename,
+                        }))
 
         # thread
         elif item.dl_type == 'thread':
@@ -205,7 +230,11 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                         return True
                     elif thread['thread'].is_404:
                         # thread 404'd
-                        print("Thread {} / {} 404'd.".format(board_name, thread_id))
+                        print(THREAD_404.format(**{
+                            'site': self.name,
+                            'board': board_name,
+                            'thread_id': thread_id,
+                        }))
                         with self.threads_lock:
                             status_info = self.threads[thread_id]
                         self.update_status('404', info=status_info)
@@ -227,7 +256,12 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
             # thread
             if not self.options.silent:
-                print('4chan Thread {} / {}  -  {} new replies'.format(board_name, thread_id, new_replies))
+                print(THREAD_NEW_REPLIES.format(**{
+                    'site': self.name,
+                    'board': board_name,
+                    'thread_id': thread_id,
+                    'replies': new_replies,
+                }))
 
             utils.mkdirs(thread_dir)
 
@@ -251,8 +285,12 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
                             if child_id not in self.threads:
                                 if self.options.follow_to_other_boards or not self.options.follow_to_other_boards and is_same_board:
-                                    print('4chan child thread {} / {} found and now being downloaded'.format(child_board, child_id))
-                                    self._add_thread_from_info(child_board, child_id)
+                                    if self._add_thread_from_info(child_board, child_id):
+                                        print(THREAD_CHILD_FOUND.format(**{
+                                            'site': self.name,
+                                            'board': child_board,
+                                            'thread_id': child_id,
+                                        }))
 
                     # external urls
                     if not URLREGEX.findall(reply.comment):
