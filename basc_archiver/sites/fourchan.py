@@ -214,7 +214,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                     else:
                         with self.threads_lock:
                             # TODO: extend BASC-py4chan to give us this number directly
-                            self.threads[thread_id]['total_files'] = len(list(running_thread.filenames()))
+                            self.threads[thread_id]['total_files'] = len(list(thread['thread'].filenames()))
                 else:
                     running_board = self.boards[board_name]
                     running_thread = running_board.get_thread(thread_id)
