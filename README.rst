@@ -98,7 +98,7 @@ Android (CLI)
 Thanks to the QPython interpreter, you can effortlessly run the
 BASC-Archiver on your Android phone.
 
-1. Install the `QPython app <https://play.google.com/store/apps/details?id=com.hipipal.qpyplus>` from Google Play.
+1. Install the `QPython app <https://play.google.com/store/apps/details?id=com.hipipal.qpyplus>`_ from Google Play.
 2. Open the QPython app, and swipe left to reach the menu.
 3. Tap **Package Index**. Then scroll down and tap **Pip Console**.
 4. Run the following commands (after starting the pip\_install.py
