@@ -89,6 +89,44 @@ Windows
 
 Using the Windows version will become simpler once we finish writing the GUI.
 
+Android (CLI)
+-------------
+
+    **Note:** This is a temporary solution until we put together some
+    kind of Android GUI app.
+
+Thanks to the QPython interpreter, you can effortlessly run the
+BASC-Archiver on your Android phone.
+
+1. Install the `QPython app <https://play.google.com/store/apps/details?id=com.hipipal.qpyplus>` from Google Play.
+2. Open the QPython app, and swipe left to reach the menu.
+3. Tap **Package Index**. Then scroll down and tap **Pip Console**.
+4. Run the following commands (after starting the pip\_install.py
+   script):
+
+   ::
+
+       pip install requests
+       pip install basc-archiver
+
+Now you can just open QPython, tap **My QPython**, tap **pip\_console**,
+and run the following command with your own thread URL:
+
+::
+
+    thread-archiver --path=/sdcard/ http://boards.4chan.org/qa/thread/23839
+
+To run the script in the background, press the back button, and tap
+**OK** at the **Run in Background** prompt. You can stop the script
+anytime using ``Vol Down`` + ``C``.
+
+-  **Note**: On Android (CLI), it is important to set the path to
+   ``/sdcard/``, so the thread dump can be accessed from the
+   ``/sdcard/archives/4chan/`` folder.
+-  **Note**: To update the BASC-Archiver on Android (CLI), you must open
+   QPython, press the **3-dot menu** button, scroll down and tap **Reset
+   Private Space**. Then just reinstall the BASC-Archiver.
+
 License
 =======
 
