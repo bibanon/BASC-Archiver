@@ -192,7 +192,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                         child_id = int(child_id)
 
                         if child_id not in self.threads:
-                            if self.options.follow_to_other_boards or not self.options.follow_to_other_boards and is_same_board:
+                            if self.options.follow_to_other_boards or is_same_board:
                                 print('  Child thread /{}/{} found and being added/downloaded'.format(child_board, child_id))
                                 self._add_thread_from_info(child_board, child_id)
                                 try:
