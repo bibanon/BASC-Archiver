@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # BASC Imageboard Archiver
-from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import print_function
+from docopt import docopt
+import sys
+import time
+
+from basc_archiver import version, Options, Archiver
 
 __doc__ = """BASC-Archiver.
 
@@ -16,35 +21,42 @@ Usage:
   thread-archiver -v | --version
 
 Options:
-  --path=<string>            Path to folder where archives will be saved [default: ./archive]
-  --runonce                  Downloads the thread as it is presently, then exits
-  --delay=<float>            Delay between file downloads [default: 0]
-  --poll-delay=<float>       Delay between thread checks [default: 20]
-  --nothumbs                 Don't download thumbnails
-  --thumbsonly               Download thumbnails, no images
-  --ssl                      Download using HTTPS
-  --follow-children          Follow threads linked in downloaded threads
-  --follow-to-other-boards   Follow linked threads, even if from other boards
-  --silent                   Suppresses mundane printouts, prints what's important
-  --verbose                  Printout more information than normal
-  -h --help                  Show help
-  -v --version               Show version
+  --path=<string>                Path to folder where archives will be saved [default: ./archive]
+  --runonce                      Downloads the thread as it is presently, then exits
+  --thread-check-delay=<float>   Delay between checks of the same thread [default: 90]
+  --delay=<float>                Delay between file downloads [default: 0]
+  --poll-delay=<float>           Delay between thread checks [default: 20]
+  --dl-threads-per-site=<int>    Download threads to use per site [default: 5]
+  --dl-thread-wait=<float>       Seconds to wait between downloads on each thread [default: 0.1]
+  --nothumbs                     Don't download thumbnails
+  --thumbsonly                   Download thumbnails, no images
+  --ssl                          Download using HTTPS
+  --follow-children              Follow threads linked in downloaded threads
+  --follow-to-other-boards       Follow linked threads, even if from other boards
+  --silent                       Suppresses mundane printouts, prints what's important
+  -v --verbose                   Printout more information than normal
+  -h --help                      Show help
+  -V --version                   Show version
 """
 
-from docopt import docopt
-import time
-import sys
-
-from basc_archiver import version, Options, Archiver
-
 if __name__ == '__main__':
-    args = docopt(__doc__, version=version)
+    args = docopt(__doc__, version='BASC-Archiver v{}'.format(version))
 
-    options = Options(args['--path'], args['--ssl'], silent=args['--silent'], verbose=args['--verbose'],
+    options = Options(args['--path'], args['--ssl'],
+                      silent=args['--silent'],
+                      verbose=args['--verbose'],
                       delay=args['--delay'],
-                      skip_thumbs=args['--nothumbs'], thumbs_only=args['--thumbsonly'],
-                      follow_child_threads=args['--follow-children'], follow_to_other_boards=args['--follow-to-other-boards'])
+                      thread_check_delay=args['--thread-check-delay'],
+                      run_once=args['--runonce'],
+                      dl_threads_per_site=args['--dl-threads-per-site'],
+                      dl_thread_wait=args['--dl-thread-wait'],
+                      skip_thumbs=args['--nothumbs'],
+                      thumbs_only=args['--thumbsonly'],
+                      follow_child_threads=args['--follow-children'],
+                      follow_to_other_boards=args['--follow-to-other-boards'])
     archiver = Archiver(options)
+
+    print('Starting download')
 
     # add threads to our archiver
     for url in args['<url>']:
@@ -57,24 +69,13 @@ if __name__ == '__main__':
 
     # download thread loop
     try:
-        if args['--runonce']:
-            archiver.download_threads()
-        else:
-            first_run = True
-            while True:
-                archiver.download_threads()
+        while True:
+            if archiver.existing_threads < 1:
+                print('')
+                print("All threads have either 404'd or no longer exist, exiting.")
+                break
 
-                if archiver.existing_threads < 1:
-                    print('')
-                    print("All threads have either 404'd or no longer exist, exiting.")
-                    break
-
-                if first_run or not options.silent:
-                    print('Waiting {} seconds before retrying (Type Ctrl-C to stop)'.format(args['--poll-delay']))
-                time.sleep(float(args['--poll-delay']))
-
-                if first_run:
-                    first_run = False
+            time.sleep(float(args['--poll-delay']))
     except KeyboardInterrupt:
         print('')
         print('Dump complete. To resume dumping, run this script again.')

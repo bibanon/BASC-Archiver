@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # BASC Imageboard Archiver Utilities
-from __future__ import print_function
 from __future__ import absolute_import
-
+from __future__ import print_function
+import codecs
+import json
 import os
 import re
-import json
-import codecs
 import time
 
 import requests
@@ -15,8 +14,11 @@ import requests
 
 def mkdirs(path):
     """Make directory, if it doesn't exist."""
-    if not os.path.exists(path):
-        os.makedirs(path)
+    try:
+        if not os.path.exists(path):
+            os.makedirs(path)
+    except OSError:  # folder exists, due to multithreading
+        pass
 
 
 def download_file(local_filename, url, clobber=False):
@@ -49,7 +51,8 @@ def download_json(local_filename, url, clobber=False):
 
         # write reformatted json
         with open(local_filename, 'w') as json_file:
-            json_file.write(json.dumps(original_data, sort_keys=True, indent=2, separators=(',', ': ')))
+            json_file.write(json.dumps(original_data, sort_keys=True, indent=2,
+                                       separators=(',', ': ')))
 
 
 def file_replace(local_filename, pattern, replacement):

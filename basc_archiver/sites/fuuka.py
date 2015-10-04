@@ -10,8 +10,8 @@ from .base import BaseSiteArchiver
 class FuukaSiteArchiver(BaseSiteArchiver):
     name = 'fuuka'
 
-    def __init__(self, options):
-        BaseSiteArchiver.__init__(self, options)
+    def __init__(self, callback_handler, options):
+        BaseSiteArchiver.__init__(self, callback_handler, options)
 
     def url_valid(self, url):
         """Return true if the given URL is for my site."""
