@@ -15,13 +15,14 @@ The **thread-archiver** is designed to archive all content from a 4chan
 thread:
 
 -  Download all images and/or thumbnails in given threads.
--  (NEW!) Download all child threads (4chan threads referred to in a post)
+-  Download all child threads (threads referred to in a post).
 -  Download a JSON dump of thread comments using the 4chan API.
--  Download the HTML page
--  Convert links in HTML to use the downloaded images
--  Download CSS/JS and convert HTML to use them
--  Keep downloading until 404 (with a user-set delay)
--  Can be restarted at any time
+-  Download the HTML page.
+-  Convert links in HTML to use the downloaded images.
+-  Download CSS/JS and convert HTML to use them.
+-  Keep downloading until 404 (with a user-set delay).
+-  Can be restarted at any time.
+-  Threaded downloading to download multiple files at the same time.
 
 The **thread-archiver** replaces the typical “Right-click Save As, Web
 Page Complete” action, which does not save full-sized images or JSON. It
@@ -39,19 +40,22 @@ Usage
       thread-archiver -v | --version
 
     Options:
-      --path=<string>            Path to folder where archives will be saved [default: ./archive]
-      --runonce                  Downloads the thread as it is presently, then exits
-      --delay=<float>            Delay between file downloads [default: 0]
-      --poll-delay=<float>       Delay between thread checks [default: 20]
-      --nothumbs                 Don't download thumbnails
-      --thumbsonly               Download thumbnails, no images
-      --ssl                      Download using HTTPS
-      --follow-children          Follow threads linked in downloaded threads
-      --follow-to-other-boards   Follow linked threads, even if from other boards
-      --silent                   Suppresses mundane printouts, prints what's important
-      --verbose                  Printout more information than normal
-      -h --help                  Show help
-      -v --version               Show version
+      --path=<string>                Path to folder where archives will be saved [default: ./archive]
+      --runonce                      Downloads the thread as it is presently, then exits
+      --thread-check-delay=<float>   Delay between checks of the same thread [default: 90]
+      --delay=<float>                Delay between file downloads [default: 0]
+      --poll-delay=<float>           Delay between thread checks [default: 20]
+      --dl-threads-per-site=<int>    Download threads to use per site [default: 5]
+      --dl-thread-wait=<float>       Seconds to wait between downloads on each thread [default: 0.1]
+      --nothumbs                     Don't download thumbnails
+      --thumbsonly                   Download thumbnails, no images
+      --ssl                          Download using HTTPS
+      --follow-children              Follow threads linked in downloaded threads
+      --follow-to-other-boards       Follow linked threads, even if from other boards
+      --silent                       Suppresses mundane printouts, prints what's important
+      -v --verbose                   Printout more information than normal
+      -h --help                      Show help
+      -V --version                   Show version
 
 
 Example
