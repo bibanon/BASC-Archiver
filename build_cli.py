@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-import os
-import sys
 from cx_Freeze import setup, Executable
 
 options = {
@@ -26,7 +23,7 @@ options = {
 
 setup(
     name='BASC-Archiver',
-    version='0.8.2',
+    version='0.9.0',
     description='Makes a complete archive of imageboard threads including images, HTML, and JSON.',
     options=options,
     executables=[Executable('thread-archiver')],
