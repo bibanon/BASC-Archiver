@@ -41,4 +41,4 @@ try:
 		time.sleep(float(1))
 except KeyboardInterrupt:
 	print('')
-	print('All 4chan-archived threads have been dumped.')
+	print('Dump stopped. To obtain more threads, run this script again.')
