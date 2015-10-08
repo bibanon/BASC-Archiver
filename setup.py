@@ -21,13 +21,13 @@ with codecs.open('README.rst') as file:
 
 setup(
     name='BASC-Archiver',
-    version='0.9.0',
+    version='0.9.1',
     description='Makes a complete archive of imageboard threads including images, HTML, and JSON.',
     long_description=long_description,
     author='Antonizoon Overtwater <antonizoon@bibanon.org>, Daniel Oaks <daniel@danieloaks.net>',
     author_email='antonizoon@bibanon.org',
     url='https://github.com/bibanon/BASC-Archiver',
-    scripts=['thread-archiver', '4chan-thread-archiver'],
+    scripts=['thread-archiver', '4chan-thread-archiver', 'archive-nabber.py'],
     packages=['basc_archiver', 'basc_archiver.sites'],
     package_dir={
         'basc_archiver': 'basc_archiver',
