@@ -20,7 +20,7 @@ if response.status_code != 200:
 	exit()
 
 # set up BASC-Archiver
-options = Options('./archive')
+options = Options('./archive', runonce=True)
 archiver = Archiver(options)
 
 # Obtain thread_ids from the board's archives
