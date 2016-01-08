@@ -81,6 +81,14 @@ class Archiver:
             threads += archiver.existing_threads
         return threads
 
+    @property
+    def files_to_download(self):
+        """Return whether we still have files to download."""
+        for archiver in self.archivers:
+            if archiver.files_to_download:
+                return True
+        return False
+
     # callbacks
     def register_callback(self, cb_type, handler):
         """Register a callback."""

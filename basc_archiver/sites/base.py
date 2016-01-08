@@ -132,7 +132,14 @@ class BaseSiteArchiver(object):
     @property
     def existing_threads(self):
         """Return how many threads we have and are downloading."""
-        return len(self.threads)
+        return len([thread for thread in self.threads.values() if thread['alive']])
+
+    @property
+    def files_to_download(self):
+        """Return whether we still have files to download."""
+        # TODO: use a reentrant lock to keep track of currently-downloading
+        #   files that have been passed to download threads
+        return len(self.to_dl) > 0
 
     # downloading specific items
     def download_item(self, item):

@@ -70,9 +70,12 @@ if __name__ == '__main__':
     # download thread loop
     try:
         while True:
-            if archiver.existing_threads < 1:
+            if archiver.files_to_download < 1:
                 print('')
-                print("All threads have either 404'd or no longer exist, exiting.")
+                if options.run_once:
+                    print('All threads have been downloaded, exiting.')
+                else:
+                    print("All threads have either 404'd or no longer exist, exiting.")
                 break
 
             time.sleep(float(args['--poll-delay']))

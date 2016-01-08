@@ -133,6 +133,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 'total_files': 0,
                 'images_downloaded': 0,
                 'thumbs_downloaded': 0,
+                'alive': True,
             }
             status_info = self.threads[thread_id]
         self.update_status('new_thread', info=status_info)
@@ -238,7 +239,7 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                         with self.threads_lock:
                             status_info = self.threads[thread_id]
                         self.update_status('404', info=status_info)
-                        del self.threads[thread_id]
+                        self.threads[thread_id]['alive'] = False
                         return True
                     else:
                         with self.threads_lock:
@@ -349,10 +350,13 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 self.add_to_dl(dl_type='thumb', board=board_name, thread_id=thread_id, filename=filename)
 
             # queue for next dl
-            item.delay_dl_timestamp(self.options.thread_check_delay)
-            self.add_to_dl(item=item)
+            if not self.options.run_once:
+                item.delay_dl_timestamp(self.options.thread_check_delay)
+                self.add_to_dl(item=item)
 
             with self.threads_lock:
-                status_info = self.threads[thread_id]
-            status_info['next_dl'] = item.next_dl_timestamp
+                if self.options.run_once:
+                    self.threads[thread_id]['alive'] = False
+            status_info = self.threads[thread_id]
+            status_info['next_dl'] = None if self.options.run_once else item.next_dl_timestamp
             self.update_status('thread_dl', info=status_info)
