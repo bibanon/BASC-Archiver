@@ -46,20 +46,26 @@ class DownloadThread(threading.Thread):
 
             # get next item to dl
             next_item = None
-            with self.site.to_dl_lock:
-                # make sure dl timestamp on selected item has passed
-                for i in range(len(self.site.to_dl)):
-                    next_item = self.site.to_dl[i]
+            with self.site.downloading_lock:
+                with self.site.to_dl_lock:
+                    # make sure dl timestamp on selected item has passed
+                    for i in range(len(self.site.to_dl)):
+                        next_item = self.site.to_dl[i]
 
-                    if next_item.can_dl():
-                        self.site.to_dl.pop(i)
-                        break
-                    else:
-                        next_item = None
+                        if next_item.can_dl():
+                            self.site.to_dl.pop(i)
+                            self.site.downloading.append(next_item)
+                            break
+                        else:
+                            next_item = None
 
             # download
             if next_item is not None:
-                self.site.download_item(next_item)
+                try:
+                    self.site.download_item(next_item)
+                finally:
+                    with self.site.downloading_lock:
+                        self.site.downloading.remove(next_item)
 
             # wait
             if next_item is None:
@@ -87,6 +93,8 @@ class BaseSiteArchiver(object):
         self.is_shutdown = False
         self.to_dl_lock = threading.Lock()
         self.to_dl = []
+        self.downloading_lock = threading.Lock()
+        self.downloading = []
 
         self._handler_callback = handler_callback
 
@@ -137,9 +145,7 @@ class BaseSiteArchiver(object):
     @property
     def files_to_download(self):
         """Return whether we still have files to download."""
-        # TODO: use a reentrant lock to keep track of currently-downloading
-        #   files that have been passed to download threads
-        return len(self.to_dl) > 0
+        return len(self.to_dl) + len(self.downloading) > 0
 
     # downloading specific items
     def download_item(self, item):
