@@ -7,7 +7,7 @@ import threading
 
 from .sites import default_archivers
 
-version = '0.9.2'
+version = '0.9.3'
 _default_base_dir = './archive'
 
 
