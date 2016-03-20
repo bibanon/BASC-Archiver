@@ -49,6 +49,8 @@ Usage
       --dl-thread-wait=<float>       Seconds to wait between downloads on each thread [default: 0.1]
       --nothumbs                     Don't download thumbnails
       --thumbsonly                   Download thumbnails, no images
+      --nojs                         Don't download javascript
+      --nocss                        Don't download css
       --ssl                          Download using HTTPS
       --follow-children              Follow threads linked in downloaded threads
       --follow-to-other-boards       Follow linked threads, even if from other boards

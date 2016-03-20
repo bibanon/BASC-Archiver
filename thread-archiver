@@ -31,6 +31,8 @@ Options:
   --dl-thread-wait=<float>       Seconds to wait between downloads on each thread [default: 0.1]
   --nothumbs                     Don't download thumbnails
   --thumbsonly                   Download thumbnails, no images
+  --nojs                         Don't download javascript
+  --nocss                        Don't download css
   --ssl                          Download using HTTPS
   --follow-children              Follow threads linked in downloaded threads
   --follow-to-other-boards       Follow linked threads, even if from other boards
@@ -38,8 +40,6 @@ Options:
   -v --verbose                   Printout more information than normal
   -h --help                      Show help
   -V --version                   Show version
-  --nojs                         Don't download javascript
-  --nocss                        Don't download css
 """
 
 if __name__ == '__main__':
@@ -55,10 +55,10 @@ if __name__ == '__main__':
                       dl_thread_wait=args['--dl-thread-wait'],
                       skip_thumbs=args['--nothumbs'],
                       thumbs_only=args['--thumbsonly'],
-                      follow_child_threads=args['--follow-children'],
-                      follow_to_other_boards=args['--follow-to-other-boards'],
                       skip_js=args['--nojs'],
-                      skip_css=args['--nocss'])
+                      skip_css=args['--nocss'],
+                      follow_child_threads=args['--follow-children'],
+                      follow_to_other_boards=args['--follow-to-other-boards'],)
     archiver = Archiver(options)
 
     print('Starting download')
