@@ -38,6 +38,8 @@ Options:
   -v --verbose                   Printout more information than normal
   -h --help                      Show help
   -V --version                   Show version
+  --nojs                         Don't download javascript
+  --nocss                        Don't download css
 """
 
 if __name__ == '__main__':
@@ -54,7 +56,9 @@ if __name__ == '__main__':
                       skip_thumbs=args['--nothumbs'],
                       thumbs_only=args['--thumbsonly'],
                       follow_child_threads=args['--follow-children'],
-                      follow_to_other_boards=args['--follow-to-other-boards'])
+                      follow_to_other_boards=args['--follow-to-other-boards'],
+                      skip_js=args['--nojs'],
+                      skip_css=args['--nocss'])
     archiver = Archiver(options)
 
     print('Starting download')

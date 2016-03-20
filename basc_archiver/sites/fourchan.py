@@ -313,26 +313,28 @@ class FourChanSiteArchiver(BaseSiteArchiver):
 
             if utils.download_file(local_filename, url, clobber=True):
                 # get css files
-                css_dir = os.path.join(thread_dir, _CSS_DIR_NAME)
-                utils.mkdirs(css_dir)
+                if not self.options.skip_css:
+                    css_dir = os.path.join(thread_dir, _CSS_DIR_NAME)
+                    utils.mkdirs(css_dir)
 
-                css_regex = re.compile(FOURCHAN_CSS_REGEX)
-                found_css_files = css_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
-                for css_filename in found_css_files:
-                    local_css_filename = os.path.join(css_dir, css_filename)
-                    url = http_header + FOURCHAN_STATIC + '/css/' + css_filename
-                    utils.download_file(local_css_filename, url)
+                    css_regex = re.compile(FOURCHAN_CSS_REGEX)
+                    found_css_files = css_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
+                    for css_filename in found_css_files:
+                        local_css_filename = os.path.join(css_dir, css_filename)
+                        url = http_header + FOURCHAN_STATIC + '/css/' + css_filename
+                        utils.download_file(local_css_filename, url)
 
                 # get js files
-                js_dir = os.path.join(thread_dir, _JS_DIR_NAME)
-                utils.mkdirs(js_dir)
+                if not self.options.skip_js:
+                    js_dir = os.path.join(thread_dir, _JS_DIR_NAME)
+                    utils.mkdirs(js_dir)
 
-                js_regex = re.compile(FOURCHAN_JS_REGEX)
-                found_js_files = js_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
-                for js_filename in found_js_files:
-                    local_js_filename = os.path.join(js_dir, js_filename)
-                    url = http_header + FOURCHAN_STATIC + '/js/' + js_filename
-                    utils.download_file(local_js_filename, url)
+                    js_regex = re.compile(FOURCHAN_JS_REGEX)
+                    found_js_files = js_regex.findall(codecs.open(local_filename, encoding='utf-8').read())
+                    for js_filename in found_js_files:
+                        local_js_filename = os.path.join(js_dir, js_filename)
+                        url = http_header + FOURCHAN_STATIC + '/js/' + js_filename
+                        utils.download_file(local_js_filename, url)
 
                 # convert links to local links
                 utils.file_replace(local_filename, '"//', '"' + http_header)
