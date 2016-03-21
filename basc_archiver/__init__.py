@@ -19,6 +19,7 @@ class Options:
                  delay=2, thread_check_delay=90,
                  dl_threads_per_site=5, dl_thread_wait=1,
                  skip_thumbs=False, thumbs_only=False,
+                 skip_js=False, skip_css=False,
                  follow_child_threads=False, follow_to_other_boards=False,
                  run_once=False,):
         self.base_dir = base_dir
@@ -31,6 +32,8 @@ class Options:
         self.dl_thread_wait = float(dl_thread_wait)
         self.skip_thumbs = skip_thumbs
         self.thumbs_only = thumbs_only
+        self.skip_js = skip_js
+        self.skip_css = skip_css
         self.follow_child_threads = follow_child_threads
         self.follow_to_other_boards = follow_to_other_boards
         self.run_once = run_once
