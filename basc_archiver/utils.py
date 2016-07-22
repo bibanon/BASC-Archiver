@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # BASC Imageboard Archiver Utilities
 from __future__ import absolute_import
