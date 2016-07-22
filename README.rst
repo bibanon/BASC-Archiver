@@ -70,7 +70,9 @@ Example
 
 Installation
 ============
-The BASC-Archiver works on both Python 2.x and 3.x, and can be installed on Windows, Linux, or Mac OS X.
+The BASC-Archiver is designed for Python 3.x, and can be installed on Windows, Linux, or Mac OS X.
+
+(Python2 has intractable ascii->unicode conversion errors, whereas Python 3.x stores all strings in unicode, so we strongly recommend using 3.x.)
 
 New stable releases can be found on our `Releases page <https://github.com/bibanon/BASC-Archiver/releases>`_,
 or installed with the PyPi package `BASC-Archiver <https://pypi.python.org/pypi/BASC-Archiver>`_.
@@ -78,8 +80,8 @@ or installed with the PyPi package `BASC-Archiver <https://pypi.python.org/pypi/
 Linux and OSX
 -------------
 
-1. Make sure you have Python installed. Here's a `Mac OS X Installation Guide. <http://docs.python-guide.org/en/latest/starting/install/osx/>`_ Note that almost all Linux distros have Python preinstalled.
-2. Run ``easy_install basc-archiver``
+1. Make sure you have Python3 and pip3 installed. On Debian/Ubuntu, Fedora/Red Hat/CentOS, install the packages `python3` and `python3-pip` . Here's a `Mac OS X Installation Guide. <http://docs.python-guide.org/en/latest/starting/install/osx/>`_ 
+2. Run ``pip3 install basc-archiver``
 
    - Linux users must run this command as root, or prefix the command with `sudo`.
 3. Run ``thread-archiver http://boards.4chan.org/etc/thread/12345``
