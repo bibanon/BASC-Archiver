@@ -25,7 +25,7 @@ Options:
   --runonce                      Downloads the thread as it is presently, then exits
   --thread-check-delay=<float>   Delay between checks of the same thread [default: 90]
   --delay=<float>                Delay between file downloads [default: 0]
-  --poll-delay=<float>           Delay between thread checks [default: 20]
+  --poll-delay=<float>           Delay between thread checks [default: 2]
   --runonce-poll=<float>         Delay between checks when using --runonce [default: 1.5]
   --dl-threads-per-site=<int>    Download threads to use per site [default: 5]
   --dl-thread-wait=<float>       Seconds to wait between downloads on each thread [default: 0.1]

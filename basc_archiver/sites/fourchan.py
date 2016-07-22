@@ -20,6 +20,7 @@ THREAD_NONEXISTENT_REASON = ("Either the thread already 404'ed, your URL is inco
 IMAGE_DL = '  Image {site} / {board} / {thread_id} / {filename} downloaded'
 THUMB_DL = '  Thumbnail {site} / {board} / {thread_id} / {filename} downloaded'
 THREAD_404 = "Thread {site} / {board} / {thread_id} 404'd."
+THREAD_ARCHIVED = "Thread {site} / {board} / {thread_id} has been archived."
 THREAD_NEW_REPLIES = 'Thread {site} / {board} / {thread_id}  -  {replies} new replies'
 THREAD_CHILD_FOUND = 'Child thread {site} / {board} / {thread_id} found and now being downloaded'
 
@@ -218,7 +219,19 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                 # skip if no new posts
                 if 'thread' in thread:
                     new_replies = thread['thread'].update()
-                    if new_replies < 1:
+                    if thread['thread'].archived:
+                        # thread got archived
+                        print(THREAD_ARCHIVED.format(**{
+                            'site': self.name,
+                            'board': board_name,
+                            'thread_id': thread_id,
+                        }))
+                        with self.threads_lock:
+                            status_info = self.threads[thread_id]
+                        self.update_status('archived', info=status_info)
+                        self.threads[thread_id]['alive'] = False
+                        return True
+                    elif new_replies < 1:
                         # skip if no new posts
                         item.delay_dl_timestamp()
 
@@ -254,6 +267,17 @@ class FourChanSiteArchiver(BaseSiteArchiver):
                     with self.threads_lock:
                         # TODO: extend BASC-py4chan to give us this number directly
                         self.threads[thread_id]['total_files'] = len(list(running_thread.filenames()))
+                    if thread['thread'].archived:
+                        # thread got archived
+                        print(THREAD_ARCHIVED.format(**{
+                            'site': self.name,
+                            'board': board_name,
+                            'thread_id': thread_id,
+                        }))
+                        with self.threads_lock:
+                            status_info = self.threads[thread_id]
+                        self.update_status('archived', info=status_info)
+                        self.threads[thread_id]['alive'] = False
 
             # thread
             if not self.options.silent:
@@ -351,8 +375,8 @@ class FourChanSiteArchiver(BaseSiteArchiver):
             for filename in thread['thread'].thumbnames():
                 self.add_to_dl(dl_type='thumb', board=board_name, thread_id=thread_id, filename=filename)
 
-            # queue for next dl
-            if not self.options.run_once:
+            # queue for next dl if thread is still alive
+            if thread['alive'] and not self.options.run_once:
                 item.delay_dl_timestamp(self.options.thread_check_delay)
                 self.add_to_dl(item=item)
 
