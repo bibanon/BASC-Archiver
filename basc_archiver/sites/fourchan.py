@@ -34,14 +34,14 @@ FOURCHAN_CDN = '4cdn.org'
 
 # new urls
 #FOURCHAN_API = 'api.' + FOURCHAN # api.4chan.org also works, but 4cdn still on
-FOURCHAN_IMAGES = 'is.' + FOURCHAN
-FOURCHAN_THUMBS = 'is.' + FOURCHAN
+#FOURCHAN_IMAGES = 'is.' + FOURCHAN
+#FOURCHAN_THUMBS = 'is.' + FOURCHAN
 #FOURCHAN_STATIC = 's.' + FOURCHAN_CDN # static.4chan.org also works, but not yet
 
 # cdn domains (no longer in use for images)
 FOURCHAN_API = 'a.' + FOURCHAN_CDN
-#FOURCHAN_IMAGES = 'i.' + FOURCHAN_CDN
-#FOURCHAN_THUMBS = 'i.' + FOURCHAN_CDN
+FOURCHAN_IMAGES = 'i.' + FOURCHAN_CDN
+FOURCHAN_THUMBS = 'i.' + FOURCHAN_CDN
 FOURCHAN_STATIC = 's.' + FOURCHAN_CDN
 
 # retrieval footer regex
