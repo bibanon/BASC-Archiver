@@ -18,7 +18,7 @@ referenced external links.
 Usage:
   thread-archiver <url>... [options]
   thread-archiver -h | --help
-  thread-archiver -v | --version
+  thread-archiver -V | --version
 
 Options:
   --path=<string>                Path to folder where archives will be saved [default: ./archive]
