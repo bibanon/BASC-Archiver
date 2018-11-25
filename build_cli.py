@@ -23,7 +23,7 @@ options = {
 
 setup(
     name='BASC-Archiver',
-    version='0.9.8',
+    version='0.9.9',
     description='Makes a complete archive of imageboard threads including images, HTML, and JSON.',
     options=options,
     executables=[Executable('thread-archiver')],
