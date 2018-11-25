@@ -25,11 +25,13 @@ THREAD_NEW_REPLIES = '{timestamp} Thread {site} / {board} / {thread_id}  -  {rep
 THREAD_CHILD_FOUND = '{timestamp} Child thread {site} / {board} / {thread_id} found and now being downloaded'
 
 # finding board name/thread id
-THREAD_REGEX = re.compile(r"""https?://(?:boards\.)?4chan\.org/([0-9a-zA-Z]+)/(?:res|thread)/([0-9]+)""")
+THREAD_REGEX = re.compile(r"""https?://(?:boards\.)?4chan(?:nel)?\.org/([0-9a-zA-Z]+)/(?:res|thread)/([0-9]+)""")
 
 # top level domains
 FOURCHAN_BOARDS = 'boards.4chan.org'
 FOURCHAN = '4chan.org'
+FOURCHANNEL = '4channel.org'
+FOURCHANNEL_BOARDS = 'boards.4channel.org'
 FOURCHAN_CDN = '4cdn.org'
 
 # new urls
